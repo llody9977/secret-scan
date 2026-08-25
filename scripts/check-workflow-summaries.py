@@ -15,6 +15,7 @@ def main() -> int:
     requirements = {
         ".github/workflows/gitleaks.yml": [
             "GITHUB_STEP_SUMMARY",
+            'tee -a "$GITHUB_STEP_SUMMARY"',
             "Gitleaks full-history scan",
             "Detective for content already pushed",
             "preventive for merge or promotion",
@@ -27,6 +28,7 @@ def main() -> int:
         ],
         ".github/workflows/trufflehog-discovery.yml": [
             "GITHUB_STEP_SUMMARY",
+            'tee -a "$GITHUB_STEP_SUMMARY"',
             "TruffleHog scheduled discovery",
             "Detective hygiene and legacy discovery",
             "Provider checks | Disabled",

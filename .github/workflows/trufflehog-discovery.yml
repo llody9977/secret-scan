@@ -108,7 +108,7 @@ jobs:
                 "| `\(.[0].DetectorName | gsub("[^A-Za-z0-9._:/+-]"; "_"))` | \(length) |"' "$report"
               printf '\nMatched values and locations are intentionally omitted. Revoke or rotate confirmed credentials before repository cleanup.\n'
             fi
-          } >>"$GITHUB_STEP_SUMMARY"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
           printf 'TruffleHog exit code: %s; findings: %s\n' "$status" "$findings"
           if [[ "$status" -eq 183 ]] && [[ "$findings" != "Unavailable" ]] && [[ "$findings" -gt 0 ]]; then

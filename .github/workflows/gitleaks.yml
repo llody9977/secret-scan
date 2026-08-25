@@ -121,7 +121,7 @@ jobs:
                 "| `\(.[0].RuleID | tostring | gsub("[^A-Za-z0-9._:/+-]"; "_"))` | \(length) |"' "$report"
               printf '\nMatched values and locations are intentionally omitted from this summary.\n'
             fi
-          } >>"$GITHUB_STEP_SUMMARY"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
           if [[ "$status" -eq 1 ]] && [[ "$findings" != "Unavailable" ]] && [[ "$findings" -gt 0 ]]; then
             printf 'Gitleaks reported %s finding(s).\n' "$findings" >&2
