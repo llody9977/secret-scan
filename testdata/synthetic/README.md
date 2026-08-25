@@ -5,6 +5,11 @@ secret-scanning controls. No value was issued by GitHub, AWS, a database, or any
 other provider. The private keys are newly generated test keys with no trust,
 account, certificate, workload, or authorized-key relationship.
 
+`positive/mailchimp-api-key.env` is a deterministic, never-issued provider-shaped
+fixture used for the GitHub-hosted test. GitHub push protection rejected its
+initial push as a Mailchimp API Key. A `used_in_tests` bypass admitted the same
+commit and created [repository alert #1](https://github.com/llody9977/secret-scan/security/secret-scanning/1).
+
 `manifest.json` is the source of truth. Each entry names the fixture target,
 the desired control decision, and the expected result for the pinned Gitleaks
 and TruffleHog versions. The harness fails if a checked-in positive or negative

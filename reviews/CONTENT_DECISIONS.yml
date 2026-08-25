@@ -385,7 +385,7 @@
     {
       "id": "CD-0008",
       "title": "Use a checked-in remote corpus and assess the governed control system",
-      "status": "accepted",
+      "status": "superseded",
       "implementation_state": "implemented",
       "scope": {
         "files": [
@@ -462,6 +462,81 @@
       ],
       "related_decisions": ["CD-0002", "CD-0004", "CD-0006"],
       "supersedes": ["CD-0001", "CD-0007"],
+      "superseded_by": "CD-0009",
+      "originated_on": "2026-08-25",
+      "last_reviewed_on": "2026-08-25"
+    },
+    {
+      "id": "CD-0009",
+      "title": "Add an explicit GitHub-hosted provider-pattern test and direct alert",
+      "status": "accepted",
+      "implementation_state": "implemented",
+      "scope": {
+        "files": [
+          "README.md",
+          "secret-scanning.md",
+          "docs/index.html",
+          "testdata/synthetic/README.md",
+          "testdata/synthetic/manifest.json",
+          "testdata/synthetic/positive/mailchimp-api-key.env",
+          "results/scanner-comparison-results.json",
+          "results/github-secret-protection-results.json",
+          "results/github-secret-protection-test-procedure.md",
+          "results/README.md"
+        ],
+        "concepts": [
+          "GitHub-hosted provider-pattern classification",
+          "repository push-protection block",
+          "used-in-tests bypass governance",
+          "direct secret-scanning alert",
+          "free public-repository plan boundary",
+          "generic and custom pattern eligibility",
+          "same-fixture cross-tool comparison"
+        ]
+      },
+      "originating_feedback": "The GitHub comparison needed an actual checked-in synthetic value that GitHub itself detected, blocked, and recorded under the repository's secret-scanning alerts. Documentation or a local mock was not sufficient, and the public personal-repository result needed to be distinguished from eligible paid organization capabilities.",
+      "decision": "Add a deterministic, never-issued Mailchimp API key-shaped fixture; push it with repository secret scanning and push protection enabled; record GitHub's initial remote rejection; use the documented used-in-tests bypass; link alert 1 directly; sanitize the alert and location metadata; rerun the same 19-scenario corpus on GitHub Actions; and compare the observed free public-repository behavior separately from untested generic, validity, and custom features available only on eligible plans and configurations.",
+      "rationale": "A provider-shaped fixture gives the host a supported pattern that can be exercised without a real credential. The initial rejection demonstrates prevention at the first governed remote boundary, while the recorded bypass and resolved alert show governance behavior. Running the identical checked-in fixture through the two pinned CLI engines makes the comparison concrete: Gitleaks detected it, TruffleHog did not with provider checks disabled, and GitHub blocked it. Keeping the remaining plan-dependent capabilities in a separate documented column avoids claiming that the free result represents an eligible organization configuration.",
+      "authoritative_sources": [
+        {
+          "title": "GitHub supported secret-scanning patterns",
+          "url": "https://docs.github.com/en/code-security/reference/secret-security/supported-secret-scanning-patterns",
+          "supports": "Mailchimp API key user-alert and push-protection support, pattern categories, and public-repository availability."
+        },
+        {
+          "title": "GitHub generic pattern eligibility",
+          "url": "https://docs.github.com/en/code-security/how-tos/secure-your-secrets/detect-secret-leaks/enabling-secret-scanning-for-generic-patterns",
+          "supports": "Organization ownership, Team plan, and GitHub Secret Protection eligibility for non-provider patterns."
+        },
+        {
+          "title": "GitHub push protection from the command line",
+          "url": "https://docs.github.com/en/code-security/how-tos/secure-your-secrets/work-with-leak-prevention/push-protection-on-the-command-line",
+          "supports": "Blocked-push output, bypass reasons, and retry behavior."
+        },
+        {
+          "title": "GitHub secret-scanning REST API",
+          "url": "https://docs.github.com/en/rest/secret-scanning/secret-scanning",
+          "supports": "Alert, resolution, bypass, validity, and location fields and the need to omit the raw secret from a sanitized result."
+        }
+      ],
+      "verification_methods": [
+        "Confirm the first push of commit bcc467fc7e4d9a4db539acd6dd00e34a5f4dc1a7 was rejected by GitHub push protection as a Mailchimp API Key at testdata/synthetic/positive/mailchimp-api-key.env line 2.",
+        "Confirm the used-in-tests bypass allowed the same commit on retry and GitHub alert 1 records mailchimp_api_key, the commit location, push_protection_bypassed true, state resolved, and resolution used_in_tests.",
+        "Confirm results/github-secret-protection-results.json contains only sanitized settings, alert, bypass, and location metadata and does not contain the matched value.",
+        "Confirm GitHub Actions run 32823251440 and artifact 9553923464 use commit bcc467f, manifest digest 7c1c67, Gitleaks 8.30.1, TruffleHog 3.97.1, 16 positives, and three negatives.",
+        "Run make compare and confirm Gitleaks reports 13 of 16 positives, TruffleHog eight of 16, both pass three negatives, and the Mailchimp scenario is detected only by Gitleaks among the two CLI configurations.",
+        "Confirm the public article and README link alert 1 directly and distinguish the tested public personal-repository configuration from untested eligible organization generic, validity, AI, and custom features."
+      ],
+      "approved_outcome": "Use the direct GitHub alert as the host result; use the remote Actions artifact for Gitleaks and TruffleHog; keep the ten rows as conditional control-system criteria; recommend host prevention for covered patterns, required portable CI for residual and internal formats, and additional discovery only for a named gap.",
+      "invalidation_conditions": [
+        "The fixture becomes provider-issued, active, or associated with a real Mailchimp account.",
+        "GitHub removes or materially changes alert 1, the Mailchimp pattern, bypass behavior, or public-repository feature availability.",
+        "A scanner version, custom configuration, manifest, host setting, repository ownership, or plan changes a recorded outcome.",
+        "Eligible-plan testing adds generic or custom results that materially change the assigned control mix.",
+        "Production measurements show unacceptable misses, noise, latency, failure behavior, bypass behavior, or operating cost."
+      ],
+      "related_decisions": ["CD-0002", "CD-0004", "CD-0006"],
+      "supersedes": ["CD-0008"],
       "superseded_by": null,
       "originated_on": "2026-08-25",
       "last_reviewed_on": "2026-08-25"

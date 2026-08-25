@@ -64,6 +64,16 @@
       }
     },
     {
+      "id": "mailchimp-api-key",
+      "credential_class": "Mailchimp API key-shaped token",
+      "target": "positive/mailchimp-api-key.env",
+      "expected_control_decision": "block",
+      "expected": {
+        "gitleaks": {"exit_code": 1, "findings": 1, "detector": "mailchimp-api-key"},
+        "trufflehog": {"exit_code": 0, "findings": 0, "detector": null}
+      }
+    },
+    {
       "id": "oauth-client-secret",
       "credential_class": "OAuth client secret",
       "target": "positive/oauth-client.env",

@@ -1,7 +1,7 @@
 {
   "last_review": {
-    "branch": "remote-corpus-evaluation",
-    "commit": "00feb11a9db6af732a82ce769dd0334af9a7629e",
+    "branch": "github-hosted-alert-test",
+    "commit": "bcc467fc7e4d9a4db539acd6dd00e34a5f4dc1a7",
     "date": "2026-08-25",
     "effort": "xhigh",
     "model": "gpt-5"
@@ -9,7 +9,7 @@
   "passes": {
     "adversarial-claims": {
       "effort": "xhigh",
-      "input_fingerprint_sha256": "a12d7ab6915fe7275b74c2fc75a43aba57039b0b4b10b98973198e681a0972b7",
+      "input_fingerprint_sha256": "f9ff05b0edc6a985e934526b931e2be7bcf410eb1f99b2e21066f9c790936863",
       "model": "gpt-5",
       "verdict": "clean",
       "verified_on": "2026-08-25",
@@ -19,18 +19,19 @@
       "effort": "xhigh",
       "evidence": {
         "dismissals": [
-          "The GitHub corpus acceptance was not treated as general provider-token weakness because every shape was non-issued and the host result is point-in-time.",
-          "The 12-of-15 and 8-of-15 counts were not used as accuracy rates or a universal ranking because the corpus is a deliberately diverse regression sample.",
+          "The single Mailchimp host finding was not converted into a GitHub accuracy rate or provider-wide coverage claim.",
+          "The earlier 15 unreported fixtures were not used to claim that eligible organization generic or custom features would miss them.",
+          "The 13-of-16 and 8-of-16 CLI counts were not used as production accuracy rates or a universal product ranking.",
+          "The free public-repository host result was separated from untested eligible organization generic, AI, validity, and custom capabilities.",
           "Pre-commit and pre-push hooks were not represented as central governance because installation and bypass remain clone-local.",
-          "The ten evaluation rows were not made universal product requirements because several belong only to assigned source scopes or procurement needs.",
           "TruffleHog broad discovery was limited to source reach and optional provider checks rather than detector superiority.",
-          "The required Gitleaks status was not represented as bypass-proof because administrator enforcement is currently disabled."
+          "The required Gitleaks status was not represented as bypass-proof because administrator enforcement remains disabled."
         ],
         "gap": "none",
         "thesis_stated": "Secret scanning should be designed as a governable control system in which detection capability, timing, enforcement, reliable operation, bypass governance, and incident response determine practical effectiveness.",
-        "thesis_supported": "The cited primary sources, hosted scanner run, GitHub host observation, and repository controls support a conditional layered design using local feedback, host prevention for supported patterns, required portable merge policy, and scoped discovery for residual gaps."
+        "thesis_supported": "The primary sources, remote GitHub Actions corpus run, direct GitHub push-protection block and alert, and repository controls support a conditional layered design using local feedback, host prevention for covered patterns, required portable merge policy, and scoped discovery for residual gaps."
       },
-      "input_fingerprint_sha256": "a12d7ab6915fe7275b74c2fc75a43aba57039b0b4b10b98973198e681a0972b7",
+      "input_fingerprint_sha256": "f9ff05b0edc6a985e934526b931e2be7bcf410eb1f99b2e21066f9c790936863",
       "model": "gpt-5",
       "verdict": "clean",
       "verified_on": "2026-08-25",
@@ -38,7 +39,7 @@
     },
     "cross-format": {
       "effort": "xhigh",
-      "input_fingerprint_sha256": "88fbd91f786a1115c659e6961438de13f865bc22f90f1da295dedf004a4e0ff6",
+      "input_fingerprint_sha256": "7e8a3c9ef9e42e8d8a63bf262b7a90f12e333a7e6786fb5053b1eedc3af94a36",
       "model": "gpt-5",
       "verdict": "clean",
       "verified_on": "2026-08-25",
@@ -46,7 +47,7 @@
     },
     "cross-page": {
       "effort": "xhigh",
-      "input_fingerprint_sha256": "0ff6f8b695516e83184748454bfefe5711ce52d6673eec9478753178a8ec89fa",
+      "input_fingerprint_sha256": "a6b3b6fb8dc2aaeee61e8adc2ad1538388130b8ef9866304b0285ae5ac1f9871",
       "model": "gpt-5",
       "verdict": "clean",
       "verified_on": "2026-08-25",
@@ -54,7 +55,7 @@
     },
     "decision-reconciliation": {
       "effort": "xhigh",
-      "input_fingerprint_sha256": "40c3e3cd005f2f1fce45865c58c05695574a3a0589bcf66a30cd4aef2c853a85",
+      "input_fingerprint_sha256": "2b85d224f263299ade1deb856cebc63b0e1d5d608ccd3ebf8f9b62a39829885c",
       "model": "gpt-5",
       "verdict": "clean",
       "verified_on": "2026-08-25",
@@ -62,7 +63,7 @@
     },
     "evidence-authority": {
       "effort": "xhigh",
-      "input_fingerprint_sha256": "feed64ff3709864011c67ca081b5063b1172d1df12ff25a78e7113ad58a43e47",
+      "input_fingerprint_sha256": "37ffa2026a9f3a47ac2543a7ba0e6ac9f302fa6f1e2408c73bb7b67a49852501",
       "model": "gpt-5",
       "verdict": "clean",
       "verified_on": "2026-08-25",
@@ -70,7 +71,7 @@
     },
     "executable-demonstration": {
       "effort": "xhigh",
-      "input_fingerprint_sha256": "df3ac483deab9381289b2c6c926dffaf1cbe88b089290a50f74af26b88d6b8ea",
+      "input_fingerprint_sha256": "864f9f53f5c88dff142666da72a0dc6d987392706533c9885d0caaa3e48fb1d0",
       "model": "gpt-5",
       "verdict": "clean",
       "verified_on": "2026-08-25",
@@ -78,7 +79,7 @@
     },
     "factual-correctness": {
       "effort": "xhigh",
-      "input_fingerprint_sha256": "46855d483711110a78d2ecf88aca7cbc720b3a071d2f9a745806d9f5171362ee",
+      "input_fingerprint_sha256": "fbbc05c421126cf1cd1f5ce6532da18a1093a1ee60d86590f41dac1d7317c708",
       "model": "gpt-5",
       "verdict": "clean",
       "verified_on": "2026-08-25",
@@ -86,7 +87,7 @@
     },
     "terminology-taxonomy": {
       "effort": "xhigh",
-      "input_fingerprint_sha256": "a12d7ab6915fe7275b74c2fc75a43aba57039b0b4b10b98973198e681a0972b7",
+      "input_fingerprint_sha256": "f9ff05b0edc6a985e934526b931e2be7bcf410eb1f99b2e21066f9c790936863",
       "model": "gpt-5",
       "verdict": "clean",
       "verified_on": "2026-08-25",
@@ -94,7 +95,7 @@
     },
     "topic-completeness": {
       "effort": "xhigh",
-      "input_fingerprint_sha256": "a12d7ab6915fe7275b74c2fc75a43aba57039b0b4b10b98973198e681a0972b7",
+      "input_fingerprint_sha256": "f9ff05b0edc6a985e934526b931e2be7bcf410eb1f99b2e21066f9c790936863",
       "model": "gpt-5",
       "verdict": "clean",
       "verified_on": "2026-08-25",

@@ -1,45 +1,61 @@
-# Repeating the GitHub Secret Protection observation
+# Repeating the GitHub-hosted secret-scanning test
 
-GitHub Secret Protection is host-native. Its result must come from a GitHub push
-and the repository alert API, not from a local regular expression or from either
-CLI scanner.
+GitHub's host result must come from a GitHub push and the repository alert API,
+not from a local regular expression or either CLI scanner.
 
-The current observation is stored in
+The current result is stored in
 [`github-secret-protection-results.json`](github-secret-protection-results.json).
-Commit `00feb11a9db6af732a82ce769dd0334af9a7629e` was accepted without a
-push-protection block. At `2026-08-25T07:05:53Z`, the alert API returned no
-repository alert and the custom-pattern endpoint returned HTTP 404 with
-“Feature not available in this repository.”
+With secret scanning and repository push protection enabled, GitHub rejected
+commit `bcc467fc7e4d9a4db539acd6dd00e34a5f4dc1a7` and classified
+`testdata/synthetic/positive/mailchimp-api-key.env:2` as a **Mailchimp API Key**.
+The documented **used in tests** bypass allowed the same commit on retry and
+created [secret-scanning alert #1](https://github.com/llody9977/secret-scan/security/secret-scanning/1).
+The alert records `mailchimp_api_key`, the commit location, the bypass, and the
+`used_in_tests` resolution without this repository copying the matched value
+into its result files.
+
+## Scope of the current test
+
+This is a public, personal repository using GitHub's hosted scanning available
+for public repositories. It does not have an organization GitHub Secret
+Protection entitlement. Provider-pattern scanning and push protection were
+enabled; non-provider generic patterns, validity checks, and repository custom
+patterns were unavailable or disabled.
+
+The host test therefore answers one narrow question directly: did this GitHub
+configuration block this checked-in, non-issued provider-shaped fixture? It
+did. It does not estimate overall GitHub detection rates or show how an eligible
+Team or Enterprise organization configuration would handle the generic and
+internal formats in the rest of the corpus.
 
 ## Preconditions
 
-- Use only the non-issued fixtures under `testdata/synthetic/` or another
-  repository that is explicitly authorized for defensive testing.
-- Never substitute a real credential, including one believed to be revoked.
-- Record repository visibility, ownership type, plan, secret-scanning setting,
-  push-protection setting, validity-check setting, and custom-pattern
-  availability. These are part of the result.
+- Use only a non-issued fixture in a repository explicitly authorized for
+  defensive testing. Never substitute a real credential, including one
+  believed to be revoked.
+- Prefer a provider-documented test value when one exists. Otherwise create a
+  deterministic value that was never requested from or issued by the provider.
+- Record repository visibility, ownership type, applicable plan, scanning
+  settings, push-protection settings, validity-check settings, and
+  custom-pattern availability. These are part of the result.
 - Keep raw alert responses private because GitHub's API includes a `secret`
   field. Persist only sanitized metadata.
 
 ## Add or change a scenario
 
-1. Add a fictional positive fixture and relevant safe negatives.
+1. Add a non-issued positive fixture and a relevant safe negative.
 2. Add the target, desired control decision, and expected CLI metadata to
    `testdata/synthetic/manifest.json`.
 3. Run `make compare`; inspect detector changes by scenario.
-4. Push the commit. Record whether GitHub rejected or accepted it, the pattern
-   name shown by GitHub, whether a bypass URL was offered, and whether a bypass
-   was used.
-5. If GitHub blocks a value that is clearly non-issued and used only by this
-   test, use GitHub's documented **used in tests** reason. Do not use an
-   exemption that disables scanning for the actor.
-6. After host scanning has had time to run, query the alert API and retain only
-   alert number, type, display name, state, resolution, bypass metadata,
-   validity, HTML URL, and sanitized location metadata.
-7. Update `results/github-secret-protection-results.json` with the query time and
-   interpretation limits. Never copy the matched value into the result, an
-   issue, pull request, workflow log, or article.
+4. Commit and push. Record whether GitHub rejected or accepted the push, the
+   pattern name and location shown by GitHub, and whether a bypass URL appeared.
+5. If GitHub blocks a value used only by this test, use GitHub's documented
+   **used in tests** bypass reason. Do not disable scanning for the actor.
+6. Retry the same push and query the alert API. Retain only alert number, type,
+   display name, state, resolution, bypass metadata, validity, HTML URL, and
+   sanitized location metadata.
+7. Update `results/github-secret-protection-results.json`, link the direct alert,
+   and rerun the remote Gitleaks/TruffleHog comparison on the same commit.
 
 ## Custom internal formats
 
@@ -50,24 +66,22 @@ The repository-only format is conceptually:
 ```
 
 Gitleaks and TruffleHog version equivalent engine-specific rules in this
-repository. GitHub custom patterns were unavailable in the current public
-personal repository. On an eligible repository, dry-run the pattern, review
-false positives, publish it, and enable custom-pattern push protection only
-after confirming host push protection and bypass governance.
+repository. GitHub custom patterns were unavailable in this public personal
+repository. On an eligible repository, dry-run the pattern, review positives
+and negatives, publish it, and enable custom-pattern push protection only after
+testing host enforcement and bypass governance on that target plan.
 
 ## How to interpret another run
 
-Do not convert the results into a universal percentage. A non-issued shape can
-be rejected by provider-version or validity logic, while a real current token
-could behave differently. Generic alerts, AI-detected passwords, provider
-alerts, partner notifications, validity checks, and push protection also have
-different support matrices.
+Do not convert a small corpus into a universal percentage. Pattern versions,
+paired-value logic, encodings, feature settings, plan eligibility, service
+limits, and optional provider checks all change what a scanner can report.
 
 For every required format that the host does not block, choose one of:
 
 1. add or refine an eligible GitHub custom pattern;
 2. add or refine a versioned portable rule and keep its CI status required;
-3. add a second required scanner only if incremental coverage justifies its
+3. add a second required scanner only when incremental coverage justifies its
    latency, noise, data boundary, and operating cost;
 4. keep a second engine as centrally scheduled discovery; or
 5. accept the gap with an owner, rationale, compensating controls, and review
@@ -76,7 +90,7 @@ For every required format that the host does not block, choose one of:
 Primary GitHub references:
 
 - [Supported secret-scanning patterns](https://docs.github.com/en/code-security/reference/secret-security/supported-secret-scanning-patterns)
-- [Secret-scanning detection scope and limitations](https://docs.github.com/en/code-security/reference/secret-security/secret-scanning-scope)
+- [Enabling generic secret scanning](https://docs.github.com/en/code-security/how-tos/secure-your-secrets/detect-secret-leaks/enabling-secret-scanning-for-generic-patterns)
 - [Managing custom patterns](https://docs.github.com/en/code-security/how-tos/secure-your-secrets/customize-leak-detection/manage-custom-patterns)
 - [Working with push protection from the command line](https://docs.github.com/en/code-security/how-tos/secure-your-secrets/work-with-leak-prevention/push-protection-on-the-command-line)
 - [Secret-scanning REST API](https://docs.github.com/en/rest/secret-scanning/secret-scanning)

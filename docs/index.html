@@ -28,7 +28,7 @@
   <div class="eyebrow">Application security / Repository controls</div>
   <h1>Make secret scanning governable, not merely early</h1>
   <p class="lede">Secret scanning reduces the chance that repository access becomes production access. Detection matters, but so do timing, enforcement, reliability, bypass governance, and incident response.</p>
-  <p>This guide commits one fictional corpus, runs Gitleaks and TruffleHog against it on GitHub Actions, records what GitHub Secret Protection did with the same push, and assigns each control to a practical role. A clean scan means only that the configured detector did not report a match.</p>
+  <p>This guide commits one fictional corpus, runs Gitleaks and TruffleHog against it on GitHub Actions, records GitHub's actual hosted push-protection result and alert, and assigns each control to a practical role. A clean scan means only that the configured detector did not report a match.</p>
   <div class="hero-actions">
     <a class="button primary" href="#results">See the test results</a>
     <a class="button secondary" href="https://github.com/llody9977/secret-scan">Source on GitHub →</a>
@@ -254,8 +254,8 @@
   <section id="comparison">
     <span class="section-kicker">Remote comparison</span>
     <h2>Commit one corpus and separate CLI, host, and documented behavior</h2>
-    <p>The repository commits 15 non-issued credential-shaped positives and three safe negatives under <a href="https://github.com/llody9977/secret-scan/tree/main/testdata/synthetic"><code>testdata/synthetic/</code></a>. It covers passwords, credential URLs, authorisation headers, provider tokens, OAuth, paired cloud keys, service accounts, private and symmetric keys, webhook secrets, an internal format, encoding, runtime references, placeholders, and public keys.</p>
-    <p>Gitleaks and TruffleHog receive equivalent custom rules on a GitHub-hosted runner. Gitleaks uses one decoding pass; TruffleHog provider checks stay disabled. GitHub's column reports what the enabled host did with the same push, then adds the documented capability needed to interpret that observation.</p>
+    <p>The repository commits 16 non-issued credential-shaped positives and three safe negatives under <a href="https://github.com/llody9977/secret-scan/tree/main/testdata/synthetic"><code>testdata/synthetic/</code></a>. It covers passwords, credential URLs, authorisation headers, provider tokens, OAuth, paired cloud keys, service accounts, private and symmetric keys, webhook secrets, an internal format, encoding, runtime references, placeholders, and public keys.</p>
+    <p>Gitleaks and TruffleHog receive equivalent custom rules on a GitHub-hosted runner. Gitleaks uses one decoding pass; TruffleHog provider checks stay disabled. GitHub's column reports the host's own push response and alert separately from documented features that were unavailable on this public personal repository.</p>
 
     <div class="table-wrap comparison-table">
       <table>
@@ -267,6 +267,7 @@
           <tr><td>HTTP Basic credential</td><td>Block</td><td>No finding</td><td>No finding</td><td>Accepted; no alert. A generic user-alert pattern is documented.</td></tr>
           <tr><td>Bearer JWT/header</td><td>Block</td><td>Detected · <code>jwt</code></td><td>No finding</td><td>Accepted; no alert. Generic Bearer-header and provider-token patterns differ.</td></tr>
           <tr><td>GitHub PAT-shaped token</td><td>Block</td><td>No finding</td><td>Detected · <code>Github</code></td><td>Accepted; no alert. Push protection is limited to supported identifiable token versions.</td></tr>
+          <tr><td>Mailchimp API key-shaped token</td><td>Block</td><td>Detected · <code>mailchimp-api-key</code></td><td>No finding</td><td><strong>Push blocked as Mailchimp API Key; <code>used_in_tests</code> bypass created <a href="https://github.com/llody9977/secret-scan/security/secret-scanning/1">alert #1</a>.</strong></td></tr>
           <tr><td>OAuth client secret</td><td>Block</td><td>Detected · <code>generic-api-key</code></td><td>No finding</td><td>Accepted; no alert. Coverage depends on provider format or custom pattern.</td></tr>
           <tr><td>AWS pair in one file</td><td>Block</td><td>Detected · <code>generic-api-key</code></td><td>Detected · <code>AWS</code></td><td>Accepted; no alert. AWS pair push protection is documented; this pair was non-issued.</td></tr>
           <tr><td>AWS pair split across files</td><td>Block</td><td>Detected one generic value</td><td>No finding</td><td>Accepted; no alert. GitHub documents that paired patterns need both parts in one file.</td></tr>
@@ -283,25 +284,26 @@
       </table>
     </div>
 
-    <p><strong>Remote result:</strong> in <a href="https://github.com/llody9977/secret-scan/actions/runs/32818011678">Actions run 32818011678</a>, Gitleaks reported 12 of 15 positives and TruffleHog reported eight; both passed three negatives. The <a href="https://github.com/llody9977/secret-scan/actions/runs/32818011678/artifacts/9552099737">machine-readable artifact</a> identifies the runner, commit, manifest digest, detector names, and exit codes. These are regression outcomes, not production accuracy rates.</p>
+    <p><strong>Remote result:</strong> in <a href="https://github.com/llody9977/secret-scan/actions/runs/32823251440">Actions run 32823251440</a>, Gitleaks reported 13 of 16 positives and TruffleHog reported eight of 16; both passed three negatives. The <a href="https://github.com/llody9977/secret-scan/actions/runs/32823251440/artifacts/9553923464">machine-readable artifact</a> identifies the runner, commit, manifest digest, detector names, and exit codes. These are regression outcomes, not production accuracy rates.</p>
 
     <aside class="callout note">
       <span class="callout-title">GitHub is an observed host result, not a simulated regex</span>
-      <p>Secret scanning and push protection were enabled. GitHub accepted <a href="https://github.com/llody9977/secret-scan/commit/00feb11a9db6af732a82ce769dd0334af9a7629e">the corpus commit</a> without offering a bypass; the sanitized API export returned no repository alert at the recorded query time, and custom patterns were unavailable. See the <a href="https://github.com/llody9977/secret-scan/blob/main/results/github-secret-protection-results.json">host result JSON</a>. Non-issued shapes do not establish how current provider-issued credentials behave.</p>
+      <p>Secret scanning and push protection were enabled. GitHub rejected <a href="https://github.com/llody9977/secret-scan/commit/bcc467fc7e4d9a4db539acd6dd00e34a5f4dc1a7">commit <code>bcc467f</code></a> as containing a Mailchimp API Key. The documented <strong>used in tests</strong> bypass allowed the retry and created <a href="https://github.com/llody9977/secret-scan/security/secret-scanning/1">secret-scanning alert #1</a>. The <a href="https://github.com/llody9977/secret-scan/blob/main/results/github-secret-protection-results.json">sanitized host result</a> records the type, location, bypass, resolution, and settings without the matched value.</p>
+      <p>This is the free public-repository configuration of a personal repository. The earlier 15 positives produced no host alert; non-provider generic and custom patterns were unavailable here. Eligible organization plans can add capabilities, but those configurations were not tested.</p>
     </aside>
 
     <h3>The ten criteria explain where each control belongs</h3>
     <div class="table-wrap comparison-table">
       <table>
-        <thead><tr><th>Evaluation criterion</th><th>Gitleaks 8.30.1</th><th>TruffleHog 3.97.1</th><th>GitHub Secret Protection here</th></tr></thead>
+        <thead><tr><th>Evaluation criterion</th><th>Gitleaks 8.30.1</th><th>TruffleHog 3.97.1</th><th>GitHub-hosted controls here</th></tr></thead>
         <tbody>
-          <tr><th>1. Coverage fit</th><td>Remote: 12/15 positives and 3/3 negatives</td><td>Remote: 8/15 positives and 3/3 negatives</td><td>Push accepted and no alert returned; documented categories are broader than this non-issued result</td></tr>
+          <tr><th>1. Coverage fit</th><td>Remote: 13/16 positives and 3/3 negatives</td><td>Remote: 8/16 positives and 3/3 negatives</td><td>Mailchimp fixture blocked and alert #1 created after a test bypass; earlier 15 positives were not reported</td></tr>
           <tr><th>2. Placement and timing</th><td>Working tree, staged changes, pre-push, Git history, CI, and schedule</td><td>Filesystem, Git/CI, schedule, source discovery, and triage</td><td>Native GitHub push boundary plus asynchronous monitoring</td></tr>
-          <tr><th>3. Enforcement and governance</th><td>Governed when CI is required and branch bypass is restricted; hooks alone are not central</td><td>Governed only if required or centrally scheduled; non-blocking here</td><td>Host policy and bypass governance; no bypass was offered in this run</td></tr>
+          <tr><th>3. Enforcement and governance</th><td>Governed when CI is required and branch bypass is restricted; hooks alone are not central</td><td>Governed only if required or centrally scheduled; non-blocking here</td><td>Initial push rejected; explicit <code>used_in_tests</code> reason and resulting alert recorded</td></tr>
           <tr><th>4. Failure semantics</th><td>Configurable finding exit; workflow also checks report and expected rule</td><td><code>--fail</code> uses 183; scan errors fail separately</td><td>Server block/accept with documented timeout and size limits</td></tr>
           <tr><th>5. Custom/internal formats</th><td>Versioned TOML rule, decoding, and committed regression cases</td><td>YAML custom detector; documented as alpha</td><td>Repository endpoint returned “feature not available”; eligible repositories support dry run and publishing</td></tr>
           <tr><th>6. History and source reach</th><td>Filesystem, Git history, stdin, and configured archives</td><td>Organisations, collaboration content, GitLab, images, object stores, CI systems, and more</td><td>GitHub history and supported collaboration surfaces, subject to plan and feature availability</td></tr>
-          <tr><th>7. Signal and validity</th><td>Offline; no provider login check</td><td>Optional provider checks can classify outcomes; disabled here</td><td>Pattern-specific validity checks exist; disabled in this repository</td></tr>
+          <tr><th>7. Signal and validity</th><td>Offline; no provider login check</td><td>Optional provider checks can classify outcomes; disabled here</td><td>Pattern classified and blocked; alert validity is <code>unknown</code> because checks were disabled</td></tr>
           <tr><th>8. Output and exceptions</th><td>Full redaction asserted; production allowlist limited to the corpus path</td><td>Raw JSON stays ephemeral; production discovery excludes the same corpus path</td><td>Alert and bypass metadata support governance; access and retention need policy</td></tr>
           <tr><th>9. Performance and reliability</th><td>Large-history performance not measured</td><td>Organisation/source and provider latency not measured</td><td>Managed service with documented push size, count, timeout, and pattern limits</td></tr>
           <tr><th>10. Operational/commercial fit</th><td>MIT; portable; operators own rules, upgrades, routing, and response</td><td>AGPL-3.0 CLI; enterprise service separate; egress and raw-output decisions matter</td><td>Native GitHub workflow; public core is free, while custom/private/internal capabilities depend on ownership and plan</td></tr>
@@ -324,10 +326,10 @@
 
     <h3>Experiment limitations</h3>
     <ul>
-      <li>Fifteen positives and three negatives are a regression matrix, not enough to estimate production false-positive or false-negative rates.</li>
+      <li>Sixteen positives and three negatives are a regression matrix, not enough to estimate production false-positive or false-negative rates.</li>
       <li>Inputs are non-issued shapes, provider checks are disabled, and no result says whether a credential is active.</li>
-      <li>GitHub accepted one commit containing all scenarios; no block was offered, so bypass governance was not exercised.</li>
-      <li>The alert export is a point-in-time observation. Non-issued shapes, asynchronous timing, disabled validity checks, and unavailable custom patterns limit the conclusion.</li>
+      <li>GitHub blocked one provider-shaped fixture and recorded its test bypass; one finding cannot estimate coverage for other providers or versions.</li>
+      <li>The earlier 15 positives produced no host alert. Disabled non-provider patterns, unavailable custom patterns, non-issued shapes, and plan boundaries limit that conclusion.</li>
       <li>TruffleHog JSON can contain raw matches, so the harness keeps it temporary and persists only safe metadata; Gitleaks reports are fully redacted.</li>
       <li>No large-history, archive, image, non-Git source, collaboration-surface, provider-latency, or operating-cost benchmark was performed.</li>
     </ul>
@@ -362,7 +364,7 @@
       <article class="choice github">
         <span class="choice-label">Shared prevention</span>
         <h3>Enable native push protection</h3>
-        <p>It can stop supported configured patterns before CI. This corpus was accepted, so test current provider versions, custom-pattern eligibility, service limits, and bypass settings.</p>
+        <p>It stopped the Mailchimp-shaped fixture before CI and recorded the test bypass. The earlier 15 formats produced no host alert here, so test current provider versions, target-plan pattern eligibility, service limits, and bypass settings.</p>
       </article>
       <article class="choice trufflehog">
         <span class="choice-label">Named residual gap</span>
@@ -420,7 +422,8 @@ password-assignment           | <span class="clean">detected</span>             
 postgres-url                  | missed                     | <span class="clean">detected</span>
 basic-header                  | missed                     | missed
 github-pat                    | missed                     | <span class="clean">detected</span>
-positive scenarios detected  | <span class="clean">12 / 15</span>                    | <span class="clean">8 / 15</span>
+mailchimp-api-key             | <span class="clean">detected</span>                   | missed
+positive scenarios detected  | <span class="clean">13 / 16</span>                    | <span class="clean">8 / 16</span>
 safe negatives passed         | <span class="clean">3 / 3</span>                     | <span class="clean">3 / 3</span>
 provider checks: disabled · fixtures: checked in · persisted output: safe metadata only</code></pre>
     </div>
@@ -429,23 +432,24 @@ provider checks: disabled · fixtures: checked in · persisted output: safe meta
       <article>
         <span class="result blocked">Required main status</span>
         <h3>Production Gitleaks gate</h3>
-        <p><a href="https://github.com/llody9977/secret-scan/actions/runs/32818011673">Run 32818011673</a> passed. The production scan excludes only the intentional corpus path. Main branch protection requires this status, although admin enforcement is disabled.</p>
+        <p><a href="https://github.com/llody9977/secret-scan/actions/runs/32823251410">Run 32823251410</a> passed. The production scan excludes only the intentional corpus path. Main branch protection requires this status, although admin enforcement is disabled.</p>
       </article>
       <article>
         <span class="result passed">Remote evaluation</span>
         <h3>Gitleaks + TruffleHog corpus run</h3>
-        <p><a href="https://github.com/llody9977/secret-scan/actions/runs/32818011678">Run 32818011678</a> passed all manifest assertions. Its job remains explicitly non-blocking; TruffleHog raw JSON stayed in ephemeral runner storage.</p>
+        <p><a href="https://github.com/llody9977/secret-scan/actions/runs/32823251440">Run 32823251440</a> passed all 19 manifest assertions. Its job remains explicitly non-blocking; TruffleHog raw JSON stayed in ephemeral runner storage.</p>
       </article>
       <article>
-        <span class="result passed">Host observation</span>
-        <h3>GitHub Secret Protection</h3>
-        <p>The corpus push was accepted without a bypass. The sanitized export returned no repository alert at the query time and recorded that custom patterns were unavailable.</p>
+        <span class="result blocked">Host push blocked</span>
+        <h3>GitHub hosted secret scanning</h3>
+        <p>GitHub classified the new fixture as a Mailchimp API Key and rejected the initial push. The <code>used_in_tests</code> bypass created <a href="https://github.com/llody9977/secret-scan/security/secret-scanning/1">alert #1</a> with the commit location and resolution.</p>
       </article>
     </div>
 
     <div class="artifact-links" aria-label="Test result files">
-      <a href="https://github.com/llody9977/secret-scan/actions/runs/32818011678"><span>Remote workflow run</span><small>Job summary, steps, versions, and logs</small></a>
-      <a href="https://github.com/llody9977/secret-scan/actions/runs/32818011678/artifacts/9552099737"><span>Remote JSON artifact</span><small>Machine-readable result retained for 90 days</small></a>
+      <a href="https://github.com/llody9977/secret-scan/actions/runs/32823251440"><span>Remote workflow run</span><small>Job summary, steps, versions, and logs</small></a>
+      <a href="https://github.com/llody9977/secret-scan/actions/runs/32823251440/artifacts/9553923464"><span>Remote JSON artifact</span><small>Machine-readable result retained for 90 days</small></a>
+      <a href="https://github.com/llody9977/secret-scan/security/secret-scanning/1"><span>GitHub alert #1</span><small>Mailchimp pattern, commit location, and test-bypass resolution</small></a>
       <a href="https://github.com/llody9977/secret-scan/blob/main/results/scanner-comparison-results.json"><span>Durable CLI snapshot</span><small>Remote provenance and both engines</small></a>
       <a href="https://github.com/llody9977/secret-scan/blob/main/results/github-secret-protection-results.json"><span>GitHub host result</span><small>Push, settings, alerts, and feature availability</small></a>
       <a href="https://github.com/llody9977/secret-scan/tree/main/testdata/synthetic"><span>Checked-in corpus</span><small>Fixtures, manifest, and extension procedure</small></a>
@@ -487,8 +491,10 @@ provider checks: disabled · fixtures: checked in · persisted output: safe meta
       <li><a href="https://github.com/trufflesecurity/trufflehog/blob/main/pkg/custom_detectors/CUSTOM_DETECTORS.md">TruffleHog custom detectors</a><span>Keywords, named regexes, character requirements, optional webhook checks, raw results, and alpha status.</span></li>
       <li><a href="https://docs.github.com/en/code-security/how-tos/secure-your-secrets/detect-secret-leaks/enable-secret-scanning">GitHub: Enabling secret scanning</a><span>Current availability for public, private/internal organisation, user-owned, Team, Enterprise Cloud, and Enterprise Server repositories.</span></li>
       <li><a href="https://docs.github.com/en/code-security/reference/secret-security/supported-secret-scanning-patterns">GitHub: Supported secret-scanning patterns</a><span>Provider, generic, AI-detected, and push-protection support, including the password limitation.</span></li>
+      <li><a href="https://docs.github.com/en/code-security/how-tos/secure-your-secrets/detect-secret-leaks/enabling-secret-scanning-for-generic-patterns">GitHub: Enabling generic secret scanning</a><span>Organization ownership, Team plan, and GitHub Secret Protection eligibility for non-provider patterns.</span></li>
       <li><a href="https://docs.github.com/en/code-security/reference/secret-security/secret-scanning-scope">GitHub: Secret-scanning scope</a><span>Pattern-pair behaviour and push-protection pattern, size, timeout, and count limitations.</span></li>
       <li><a href="https://docs.github.com/en/code-security/how-tos/secure-your-secrets/customize-leak-detection/manage-custom-patterns">GitHub: Managing custom patterns</a><span>Dry runs, publishing, and push protection for organisation-specific formats.</span></li>
+      <li><a href="https://docs.github.com/en/code-security/how-tos/secure-your-secrets/work-with-leak-prevention/push-protection-on-the-command-line">GitHub: Push protection from the command line</a><span>Blocked-push behavior, bypass choices, and the retry window used by this hosted test.</span></li>
       <li><a href="https://docs.github.com/en/code-security/concepts/secret-security/secret-security-with-github">GitHub: Secret security with GitHub</a><span>Monitoring surfaces, push prevention, public monitoring, alert workflows, and governance.</span></li>
       <li><a href="https://docs.github.com/en/actions/concepts/security/openid-connect">GitHub Actions OpenID Connect</a><span>Short-lived provider tokens in place of stored cloud credentials.</span></li>
       <li><a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository">GitHub: Removing sensitive data</a><span>Revocation-first response and history-rewrite side effects.</span></li>

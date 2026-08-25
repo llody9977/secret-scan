@@ -21,15 +21,17 @@ This is not a recommendation to run every engine at every gate.
 
 ## Hosted corpus result
 
-The repository commits 15 fictional credential-shaped positives and three safe negatives under [`testdata/synthetic/`](testdata/synthetic/). No value was provider-issued; the private keys are newly generated untrusted test keys.
+The repository commits 16 fictional credential-shaped positives and three safe negatives under [`testdata/synthetic/`](testdata/synthetic/). No value was provider-issued; the private keys are newly generated untrusted test keys.
 
 | Control | Observed result for this corpus | Assigned role here |
 | --- | --- | --- |
-| Gitleaks 8.30.1 | 12/15 positive scenarios reported; 3/3 negatives passed | Required main-branch status plus local feedback; admin enforcement remains disabled |
-| TruffleHog 3.97.1 | 8/15 positive scenarios reported; 3/3 negatives passed | Non-blocking regression and scheduled discovery |
-| GitHub Secret Protection | Corpus push accepted without a block; sanitized alert export returned no corpus alert; repository custom patterns were unavailable | Host prevention for supported patterns, with a portable CI layer for residual gaps |
+| Gitleaks 8.30.1 | 13/16 positive scenarios reported; 3/3 negatives passed | Required main-branch status plus local feedback; admin enforcement remains disabled |
+| TruffleHog 3.97.1 | 8/16 positive scenarios reported; 3/3 negatives passed | Non-blocking regression and scheduled discovery |
+| GitHub hosted secret scanning | Blocked the added Mailchimp-shaped fixture at push; a `used_in_tests` bypass created [alert #1](https://github.com/llody9977/secret-scan/security/secret-scanning/1). The earlier 15 positive fixtures produced no host alert | First governed remote boundary for covered provider patterns; use eligible generic/custom patterns or portable CI for assigned residual formats |
 
-These are per-scenario regression outcomes, not production accuracy rates. See the [GitHub Actions run](https://github.com/llody9977/secret-scan/actions/runs/32818011678), [machine-readable artifact](https://github.com/llody9977/secret-scan/actions/runs/32818011678/artifacts/9552099737), [durable result snapshot](results/scanner-comparison-results.json), and [GitHub host result](results/github-secret-protection-results.json).
+These are per-scenario regression outcomes, not production accuracy rates. See the [GitHub Actions run](https://github.com/llody9977/secret-scan/actions/runs/32823251440), [machine-readable artifact](https://github.com/llody9977/secret-scan/actions/runs/32823251440/artifacts/9553923464), [durable result snapshot](results/scanner-comparison-results.json), [sanitized GitHub host result](results/github-secret-protection-results.json), and [direct GitHub alert](https://github.com/llody9977/secret-scan/security/secret-scanning/1).
+
+The GitHub host test is the free public-repository configuration of a personal repository. Provider scanning and push protection are enabled. Non-provider generic patterns, validity checks, and custom patterns are unavailable or disabled here; eligible organization plans can add capabilities, but those configurations must be tested separately.
 
 The production scans exclude only the intentional corpus path. The separate remote evaluation workflow copies and scans that directory explicitly, rejects unmanifested fixtures, asserts every scenario outcome, publishes a job summary, and uploads safe metadata. Raw TruffleHog matches remain ephemeral; Gitleaks reports must pass a full-redaction check.
 

@@ -1,12 +1,12 @@
 {
   "schema_version": 3,
-  "measured_at_utc": "2026-08-25T06:41:29Z",
+  "measured_at_utc": "2026-08-25T07:47:28Z",
   "execution": {
     "environment": "github-actions",
     "repository": "llody9977/secret-scan",
-    "commit": "00feb11a9db6af732a82ce769dd0334af9a7629e",
-    "run_id": "32818011678",
-    "run_url": "https://github.com/llody9977/secret-scan/actions/runs/32818011678",
+    "commit": "bcc467fc7e4d9a4db539acd6dd00e34a5f4dc1a7",
+    "run_id": "32823251440",
+    "run_url": "https://github.com/llody9977/secret-scan/actions/runs/32823251440",
     "runner_os": "Linux",
     "runner_arch": "X64"
   },
@@ -15,9 +15,9 @@
     "secret_material_committed": true,
     "values_are_non_issued": true,
     "path": "testdata/synthetic",
-    "manifest_sha256": "b4e3fcbb3cab01e923cac8f37db34fc84229e9ad777ecc90d796db82cdcb17f2",
+    "manifest_sha256": "7c1c676dd8d35559104c5ddf65dcc38dee7b784ad11b9cd3ef52e7b6825e012d",
     "provider_checks_enabled": false,
-    "positive_scenarios": 15,
+    "positive_scenarios": 16,
     "safe_negative_scenarios": 3,
     "scenarios": [
       {
@@ -137,6 +137,26 @@
           "exit_code": 183,
           "findings": 1,
           "detector": "Github",
+          "matched_manifest_expectation": true
+        }
+      },
+      {
+        "id": "mailchimp-api-key",
+        "credential_class": "Mailchimp API key-shaped token",
+        "fixture_target": "positive/mailchimp-api-key.env",
+        "expected_control_decision": "block",
+        "gitleaks": {
+          "detected": true,
+          "exit_code": 1,
+          "findings": 1,
+          "detector": "mailchimp-api-key",
+          "matched_manifest_expectation": true
+        },
+        "trufflehog": {
+          "detected": false,
+          "exit_code": 0,
+          "findings": 0,
+          "detector": null,
           "matched_manifest_expectation": true
         }
       },
@@ -384,7 +404,7 @@
   },
   "summary": {
     "note": "Scenario detections are regression results for this manifest and pinned configuration, not production accuracy rates.",
-    "gitleaks_positive_scenarios_detected": 12,
+    "gitleaks_positive_scenarios_detected": 13,
     "trufflehog_positive_scenarios_detected": 8,
     "gitleaks_safe_negatives_passed": 3,
     "trufflehog_safe_negatives_passed": 3
