@@ -22,14 +22,22 @@ for required_command in gitleaks trufflehog jq git; do
   fi
 done
 
+comparison_root="$(mktemp -d "${TMPDIR:-/tmp}/secret-scanner-comparison.XXXXXX")"
+cleanup() {
+  rm -rf -- "$comparison_root"
+}
+trap cleanup EXIT
+
 jq -e '
   .schema_version == 1 and
   (.provider_checks_enabled == false) and
   (.scenarios | length > 0) and
+  ([.scenarios[].id] | length == (unique | length)) and
+  ([.scenarios[].target] | length == (unique | length)) and
   all(.scenarios[];
     (.id | type == "string" and length > 0) and
     (.credential_class | type == "string" and length > 0) and
-    (.target | type == "string" and length > 0) and
+    (.target | type == "string" and test("^(positive|negative)/[^/].*") and (contains("..") | not)) and
     (.expected_control_decision == "block" or .expected_control_decision == "pass") and
     (.expected.gitleaks.exit_code | type == "number") and
     (.expected.gitleaks.findings | type == "number") and
@@ -38,11 +46,29 @@ jq -e '
   )
 ' "$manifest" >/dev/null
 
-comparison_root="$(mktemp -d "${TMPDIR:-/tmp}/secret-scanner-comparison.XXXXXX")"
-cleanup() {
-  rm -rf -- "$comparison_root"
-}
-trap cleanup EXIT
+actual_corpus_files="$comparison_root/actual-corpus-files.txt"
+covered_corpus_files="$comparison_root/covered-corpus-files.txt"
+git -C "$repo_root" ls-files --cached --others --exclude-standard -- \
+  testdata/synthetic/positive testdata/synthetic/negative |
+  sed 's#^testdata/synthetic/##' |
+  LC_ALL=C sort -u >"$actual_corpus_files"
+
+while IFS= read -r target; do
+  if [[ -f "$corpus_root/$target" ]]; then
+    printf '%s\n' "$target"
+  elif [[ -d "$corpus_root/$target" ]]; then
+    awk -v prefix="$target/" 'index($0, prefix) == 1' "$actual_corpus_files"
+  else
+    printf 'manifest target does not exist: %s\n' "$target" >&2
+    exit 1
+  fi
+done < <(jq -r '.scenarios[].target' "$manifest") |
+  LC_ALL=C sort -u >"$covered_corpus_files"
+
+if ! diff -u "$covered_corpus_files" "$actual_corpus_files" >&2; then
+  printf 'every checked-in corpus fixture must be covered by a manifest target\n' >&2
+  exit 1
+fi
 
 reports_root="$comparison_root/reports"
 scan_corpus_root="$comparison_root/corpus"

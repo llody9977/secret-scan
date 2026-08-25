@@ -7,7 +7,8 @@ account, certificate, workload, or authorized-key relationship.
 
 `manifest.json` is the source of truth. Each entry names the fixture target,
 the desired control decision, and the expected result for the pinned Gitleaks
-and TruffleHog versions. To add a format:
+and TruffleHog versions. The harness fails if a checked-in positive or negative
+fixture is not covered by a unique manifest target. To add a format:
 
 1. add a non-issued positive and at least one relevant negative;
 2. add the scenario and expected detector metadata to `manifest.json`;

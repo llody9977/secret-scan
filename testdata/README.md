@@ -12,4 +12,5 @@ provider and none can authenticate to a service.
 The normal repository gates exclude only `testdata/synthetic/`, because those
 files intentionally resemble credentials. The separate remote evaluation
 workflow scans that directory explicitly, keeps raw TruffleHog output on the
-ephemeral runner, fully redacts Gitleaks reports, and publishes safe metadata.
+ephemeral runner, fully redacts Gitleaks reports, rejects unmanifested corpus
+files, and publishes safe metadata.
