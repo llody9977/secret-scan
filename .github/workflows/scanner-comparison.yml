@@ -1,4 +1,6 @@
-name: Controlled scanner comparison
+name: Remote scanner evaluation
+
+run-name: Remote scanner evaluation · ${{ github.sha }}
 
 on:
   push:
@@ -10,7 +12,7 @@ permissions:
 
 jobs:
   compare:
-    name: Comparison only — not a merge gate
+    name: Checked-in corpus — Gitleaks + TruffleHog (not a merge gate)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -52,12 +54,51 @@ jobs:
           chmod 0755 "$bin_dir/gitleaks" "$bin_dir/trufflehog"
           printf '%s\n' "$bin_dir" >> "$GITHUB_PATH"
 
-      - name: Run controlled corpus through both engines
-        run: ./scripts/compare-secret-scanners.sh
+      - name: Scan the checked-in corpus and publish the job summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          result="$RUNNER_TEMP/hosted-scanner-results.json"
+          ./scripts/compare-secret-scanners.sh --json >"$result"
+
+          # The JSON contains detector metadata only; raw TruffleHog matches
+          # never leave the script's ephemeral working directory.
+          jq . "$result"
+          {
+            printf '## Checked-in synthetic corpus\n\n'
+            printf -- '- Commit: [%s](%s/%s/commit/%s)\n' \
+              "$GITHUB_SHA" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_SHA"
+            printf -- '- Corpus: [testdata/synthetic](%s/%s/tree/%s/testdata/synthetic)\n' \
+              "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_SHA"
+            printf -- '- Provider checks: disabled\n\n'
+            printf '| Scenario | Decision | Gitleaks | TruffleHog |\n'
+            printf '| --- | --- | --- | --- |\n'
+            jq -r '.corpus.scenarios[] | [
+              .credential_class,
+              .expected_control_decision,
+              (if .gitleaks.detected then "Detected: `\(.gitleaks.detector)`" else "No finding" end),
+              (if .trufflehog.detected then "Detected: `\(.trufflehog.detector)`" else "No finding" end)
+            ] | "| \(.[0]) | \(.[1]) | \(.[2]) | \(.[3]) |"' "$result"
+            printf '\nThese are regression outcomes for the committed manifest and pinned configurations, not production accuracy rates.\n'
+          } >>"$GITHUB_STEP_SUMMARY"
+
+      - name: Upload machine-readable hosted result
+        id: upload-result
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: hosted-scanner-results-${{ github.sha }}
+          path: ${{ runner.temp }}/hosted-scanner-results.json
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Link the result artifact from the job summary
+        env:
+          ARTIFACT_URL: ${{ steps.upload-result.outputs.artifact-url }}
+        run: printf '\n[Download the machine-readable result artifact](%s)\n' "$ARTIFACT_URL" >>"$GITHUB_STEP_SUMMARY"
 
       - name: Explain workflow semantics
         run: |
           printf '%s\n' \
-            'This job reproduces the controlled comparison.' \
+            'This job scans the checked-in fictional corpus on a GitHub-hosted runner.' \
             'Do not configure it as the required merge gate.' \
             'Use the separate Gitleaks full-history gate for that purpose.'

@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 *.pem
+!testdata/synthetic/positive/rsa-private-key.pem
 *.key
 credentials.json
 

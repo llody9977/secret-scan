@@ -48,6 +48,7 @@ jobs:
           set +e
           trufflehog git file://. \
             --config .trufflehog.yml \
+            --exclude-paths .trufflehog-exclude-paths.txt \
             --no-verification \
             --no-update \
             --json \

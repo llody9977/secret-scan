@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<title>Secret scanning — controls, business risk, and test results</title>
-<meta name="description" content="What secrets are, why repository leaks become business incidents, where secret-scanning gates belong, how Gitleaks, TruffleHog, and GitHub Secret Protection compare, and how to store and respond to secrets safely.">
+<title>Secret scanning — control effectiveness, governance, and remote results</title>
+<meta name="description" content="How to evaluate secret-scanning capability, enforcement, governance, and operations using a checked-in corpus and remote Gitleaks, TruffleHog, and GitHub Secret Protection results.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Secret scanning — catch credentials before code becomes an incident">
-<meta property="og:description" content="Business risk, evaluation criteria, gate placement, controlled scanner results, and a tool-to-gate recommendation.">
+<meta property="og:description" content="Business risk, control effectiveness, governance, checked-in fixtures, remote scanner results, and a practical tool-to-gate decision.">
 <meta property="og:url" content="https://llody9977.github.io/secret-scan/">
 <meta property="og:image" content="https://llody9977.github.io/secret-scan/og.jpg">
 <meta property="og:image:width" content="1200">
@@ -16,7 +16,7 @@
 <meta property="og:image:alt" content="Secret scanning: catch credentials before code becomes an incident. A credential-shaped token is stopped at a blue repository gate before reaching production.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Secret scanning — catch credentials before code becomes an incident">
-<meta name="twitter:description" content="Business risk, evaluation criteria, gate placement, controlled scanner results, and a tool-to-gate recommendation.">
+<meta name="twitter:description" content="Business risk, control effectiveness, governance, checked-in fixtures, remote scanner results, and a practical tool-to-gate decision.">
 <meta name="twitter:image" content="https://llody9977.github.io/secret-scan/og.jpg">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>🔐</text></svg>">
 <link rel="stylesheet" href="styles.css">
@@ -26,9 +26,9 @@
 
 <header class="hero">
   <div class="eyebrow">Application security / Repository controls</div>
-  <h1>Catch credentials before a code change becomes an incident</h1>
-  <p class="lede">Secret scanning reduces the chance that possession of a repository becomes possession of a production system. It works best as a layered control: catch matching values before commit, enforce the decision again at the shared repository boundary, and keep real credentials in systems designed for their lifecycle.</p>
-  <p>A scanner is not a secret manager, and a clean scan means only that the configured detectors did not report a match. This guide defines the selection criteria first, tests Gitleaks and TruffleHog on the same controlled corpus, and maps each control to the gate where it adds value.</p>
+  <h1>Make secret scanning governable, not merely early</h1>
+  <p class="lede">Secret scanning reduces the chance that repository access becomes production access. Detection matters, but so do timing, enforcement, reliability, bypass governance, and incident response.</p>
+  <p>This guide commits one fictional corpus, runs Gitleaks and TruffleHog against it on GitHub Actions, records what GitHub Secret Protection did with the same push, and assigns each control to a practical role. A clean scan means only that the configured detector did not report a match.</p>
   <div class="hero-actions">
     <a class="button primary" href="#results">See the test results</a>
     <a class="button secondary" href="https://github.com/llody9977/secret-scan">Source on GitHub →</a>
@@ -36,7 +36,7 @@
   <div class="status-strip" aria-label="Article status">
     <span><strong>Updated</strong> 25 Aug 2026</span>
     <span><strong>Compared</strong> Gitleaks 8.30.1 / TruffleHog 3.97.1</span>
-    <span><strong>Fixture</strong> fictional, offline, redacted</span>
+    <span><strong>Corpus</strong> checked in, non-issued, provider checks off</span>
   </div>
 </header>
 
@@ -69,18 +69,18 @@
     <div class="decision-grid">
       <article>
         <span class="step">01</span>
-        <h3>Start with one portable baseline</h3>
-        <p>Use Gitleaks before commit and push, then enforce it centrally on pushes, pull requests, merge pushes, and a daily schedule. Make its pull-request status required.</p>
+        <h3>Keep local scans as feedback</h3>
+        <p>Pre-commit and pre-push hooks can stop mistakes early, but per-clone installation and bypass mean they are not organisation-wide enforcement.</p>
       </article>
       <article>
         <span class="step">02</span>
-        <h3>Add a distinct push boundary</h3>
-        <p>For an eligible GitHub repository, enable native push protection. It may block supported configured patterns as content reaches the host; test its pattern and push limits.</p>
+        <h3>Govern the host boundary</h3>
+        <p>Enable native push protection for supported patterns and govern bypass. It is the shared control that can prevent covered values from entering GitHub before CI.</p>
       </article>
       <article>
         <span class="step">03</span>
-        <h3>Add discovery for a stated need</h3>
-        <p>Use TruffleHog on a schedule, in authorised triage, or as a second CI scanner only when its detector results, source reach, or provider checks close a named risk gap.</p>
+        <h3>Require portable policy centrally</h3>
+        <p>Use required Gitleaks CI for merge policy and internal formats. Add TruffleHog discovery only when distinct detectors, sources, or approved provider checks close a named gap.</p>
       </article>
     </div>
   </section>
@@ -170,145 +170,155 @@
   </section>
 
   <section id="gates">
-    <span class="section-kicker">Control placement</span>
-    <h2>Gate before commit, at push, and before merge</h2>
-    <p>Each enforcement point sees a different state and has a different bypass path. “Clean” below means no configured detector fired; it does not assert that no secret exists.</p>
+    <span class="section-kicker">Control effectiveness</span>
+    <h2>Judge a gate by capability, timing, enforcement, operation, and governance</h2>
+    <p>An early control is not automatically a governable control. A local hook can prevent a commit when installed and not bypassed. Required CI is centrally governed, but the branch content has already reached the remote. Host push protection is the shared preventive boundary for the patterns it covers.</p>
 
-    <div class="gate-flow" role="img" aria-label="Layered flow from developer worktree through pre-commit, pre-push or host push protection, required pull-request scan, merge, scheduled discovery, and incident response. A finding blocks at each preventive gate.">
+    <div class="card-grid">
+      <article><h3>Detection capability</h3><p>Does the configured rule set find the organisation's actual credential formats without unacceptable noise?</p></article>
+      <article><h3>Timing and enforcement</h3><p>Does it run before the business event that matters, and can policy require it and fail safely?</p></article>
+      <article><h3>Operation and governance</h3><p>Are reliability, bypass, exceptions, audit events, ownership, revocation, and remediation reviewable?</p></article>
+    </div>
+
+    <div class="gate-flow" role="img" aria-label="Developer-controlled local feedback is followed by centrally governed host push protection, remote branch exposure, required CI merge control, protected merge, and scheduled discovery.">
       <div class="gate-node start"><span>Developer worktree</span></div>
       <div class="gate-arrow" aria-hidden="true">↓</div>
       <div class="gate-row">
-        <div class="gate-stop"><small>Finding</small><strong>Block before Git history</strong></div>
-        <div class="gate-node check"><span>Pre-commit scan</span></div>
-        <div class="gate-next"><small>Clean</small><span aria-hidden="true">↓</span></div>
+        <div class="gate-stop"><small>Finding</small><strong>Prevent local commit or push</strong></div>
+        <div class="gate-node check"><span>Local hook · developer controlled</span></div>
+        <div class="gate-next"><small>Clean or bypassed</small><span aria-hidden="true">↓</span></div>
       </div>
       <div class="gate-row">
-        <div class="gate-stop"><small>Finding</small><strong>Block before or at shared repository</strong></div>
-        <div class="gate-node check"><span>Pre-push or host push protection</span></div>
-        <div class="gate-next"><small>Clean</small><span aria-hidden="true">↓</span></div>
+        <div class="gate-stop"><small>Covered finding</small><strong>Reject push or govern bypass</strong></div>
+        <div class="gate-node check"><span>Host push protection · central</span></div>
+        <div class="gate-next"><small>Accepted</small><span aria-hidden="true">↓</span></div>
       </div>
+      <div class="gate-node start"><span>Remote branch · exposure now exists</span></div>
+      <div class="gate-arrow" aria-hidden="true">↓</div>
       <div class="gate-row">
-        <div class="gate-stop"><small>Finding</small><strong>Block merge; rotate if already pushed</strong></div>
-        <div class="gate-node check"><span>Required pull-request scan</span></div>
+        <div class="gate-stop"><small>Finding or error</small><strong>Block promotion; respond if real</strong></div>
+        <div class="gate-node check"><span>Required CI · central merge control</span></div>
         <div class="gate-next"><small>Clean</small><span aria-hidden="true">↓</span></div>
       </div>
-      <div class="gate-node start"><span>Merge</span></div>
+      <div class="gate-node start"><span>Protected merge or deployment</span></div>
       <div class="gate-arrow" aria-hidden="true">↓</div>
       <div class="gate-node detect"><span>Scheduled history, organisation, and artifact discovery</span></div>
       <div class="gate-arrow late" aria-hidden="true"><small>Late finding</small>↓</div>
       <div class="gate-node incident"><span>Revoke, investigate, remove, and add a guard</span></div>
     </div>
-    <p class="caption">Practical layered control model. All targets must be local or explicitly authorised.</p>
+    <p class="caption">“Clean” means no configured detector fired; it does not assert that no secret exists.</p>
 
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Gate</th><th>What it prevents or detects</th><th>Limitation</th></tr></thead>
+        <thead><tr><th>Control point</th><th>Prevents first remote exposure?</th><th>Centrally governable?</th><th>Practical role</th></tr></thead>
         <tbody>
-          <tr><td>Editor or working-tree scan</td><td>Fast feedback before staging</td><td>Optional, easy to forget, and editor coverage varies</td></tr>
-          <tr><td>Pre-commit hook</td><td>Stops a matching value before a commit object exists</td><td>Installed per clone and bypassable</td></tr>
-          <tr><td>Pre-push hook</td><td>Catches committed history before it leaves the workstation</td><td>Still local and bypassable; history scans can be slower</td></tr>
-          <tr><td>Host push protection or pre-receive hook</td><td>Enforces a shared boundary before or as data reaches the host</td><td>Product, plan, pattern, size, timeout, and bypass-policy limits apply</td></tr>
-          <tr><td>Required pull-request CI</td><td>Creates a reproducible, team-visible merge gate</td><td>A feature branch secret is already remote; the check gates merge, not initial exposure</td></tr>
-          <tr><td>Scheduled discovery</td><td>Finds legacy history, unmerged branches, and control drift</td><td>Detective, not preventive; findings require ownership and remediation</td></tr>
-          <tr><td>Artifact, image, package, and log scanning</td><td>Finds values copied outside source files</td><td>Requires tools that understand those formats and stores</td></tr>
+          <tr><td>Editor/manual scan</td><td>Potentially, when used</td><td>No</td><td>Optional convenience and education</td></tr>
+          <tr><td>Pre-commit hook</td><td>Yes when installed and not bypassed</td><td>Usually no</td><td>Fast feedback before a commit object exists</td></tr>
+          <tr><td>Pre-push hook</td><td>Yes when installed and not bypassed</td><td>Usually no</td><td>Last developer-controlled check before transfer</td></tr>
+          <tr><td>Host push protection / pre-receive</td><td>Yes for supported configured patterns within limits</td><td>Yes</td><td>Primary governed preventive boundary</td></tr>
+          <tr><td>Required pull-request CI</td><td>No; the branch is already remote</td><td>Yes for merge when bypass is restricted</td><td>Portable custom policy and reproducible merge control</td></tr>
+          <tr><td>After-push or scheduled scan</td><td>No</td><td>Yes when centrally scheduled and routed</td><td>Drift, history, legacy, and wider-source discovery</td></tr>
+          <tr><td>Artifact/image/package/log scan</td><td>Only when it gates publication</td><td>Yes when integrated with publishing</td><td>Material copied beyond source files</td></tr>
         </tbody>
       </table>
     </div>
 
     <aside class="callout recommendation">
-      <span class="callout-title">Exact default for this repository</span>
-      <p><strong>Gitleaks</strong> runs at pre-commit, pre-push, every push and pull request, the push created by a merge, and daily. Make its pull-request status required. <strong>GitHub push protection</strong> belongs at the host push boundary when eligible. <strong>TruffleHog</strong> runs as scheduled discovery or authorised triage unless measured gaps justify another CI gate.</p>
+      <span class="callout-title">Governable baseline</span>
+      <p>Use local hooks for feedback, GitHub push protection for the supported patterns that must not reach the remote, required Gitleaks CI for portable merge policy and internal formats, and scheduled discovery for history and sources preventive gates do not cover.</p>
     </aside>
   </section>
 
   <section id="evaluation">
-    <span class="section-kicker">Procurement and engineering checklist</span>
-    <h2>Define the requirements before comparing tools</h2>
-    <p>A feature count is not a selection method. Turn the organisation's secret types, code flow, data boundary, and response process into pass/fail requirements, then run representative positive and negative cases.</p>
+    <span class="section-kicker">Selection criteria</span>
+    <h2>Use ten evaluation questions, not ten mandatory product features</h2>
+    <p>No single scanner needs to cover every source, provider check, governance workflow, and commercial boundary. A criterion becomes mandatory only when the assigned control or business risk needs it. The practical requirement is that the <strong>control system</strong> has no unowned mandatory gap.</p>
     <div class="evaluation-grid">
-      <article><span>01</span><div><h3>Scope</h3><p>Confirm staged changes, full history and refs, untracked files, archives, images, CI logs, collaboration surfaces, and artifact stores. A shallow checkout silently narrows a history scan.</p></div></article>
-      <article><span>02</span><div><h3>Detector coverage</h3><p>Test actual providers, token generations, key pairs, generic credentials, private keys, and organisation-specific formats with safe positive and negative cases.</p></div></article>
-      <article><span>03</span><div><h3>Signal and provider checks</h3><p>Measure false positives and negatives. If the tool checks whether credentials are active, document destinations, permissions exercised, audit trail, rate limits, indeterminate results, and credential handling.</p></div></article>
-      <article><span>04</span><div><h3>Gate semantics</h3><p>Confirm exit codes, whether scanner errors fail closed, which classes block, and whether the status check is actually required. Do not infer a finding from an ambiguous status alone.</p></div></article>
-      <article><span>05</span><div><h3>History behaviour</h3><p>A pull-request diff cannot find an old credential outside the diff. Test initial/root commits, full-history onboarding, schedules, force pushes, and all relevant references.</p></div></article>
-      <article><span>06</span><div><h3>Safe output</h3><p>Redact values in logs, annotations, artifacts, and notifications. Limit report downloads. A scanner that republishes the value widens the incident.</p></div></article>
-      <article><span>07</span><div><h3>Baselines and exceptions</h3><p>Require an owner, reason, narrow scope, and review or expiry date. Prefer a fingerprint or path/rule exception over disabling a detector globally.</p></div></article>
-      <article><span>08</span><div><h3>Custom rules</h3><p>Inventory formats no vendor knows by default. Version patterns with safe tests, and test each engine's regex syntax and decoding rather than assuming expressions are portable.</p></div></article>
-      <article><span>09</span><div><h3>Performance and reliability</h3><p>Measure monorepo history, large pushes, binary content, nested archives, submodules, timeouts, and failure behaviour. Routine bypass means the gate is ineffective.</p></div></article>
-      <article><span>10</span><div><h3>Operations</h3><p>Review routing, deduplication, stable fingerprints, audit events, bulk revocation, ownership, metrics, and integration with the incident process.</p></div></article>
-      <article><span>11</span><div><h3>Tool security</h3><p>Pin releases or immutable action commits, check release checksums, use read-only repository access, isolate unrelated CI secrets, and monitor maintenance posture.</p></div></article>
-      <article><span>12</span><div><h3>Licence and data boundary</h3><p>Confirm licence obligations, hosted-service handling, repository eligibility, enterprise-server differences, network egress, and cost across the whole scope.</p></div></article>
+      <article><span>01</span><div><h3>Coverage fit</h3><p>Always test the provider versions, generic values, pairs, keys, encodings, and internal formats assigned to the control.</p></div></article>
+      <article><span>02</span><div><h3>Placement and timing</h3><p>Choose the point before the business event to prevent: commit, first remote exposure, merge, deployment, or later discovery.</p></div></article>
+      <article><span>03</span><div><h3>Enforcement and governance</h3><p>Mandatory controls need central authority, restricted bypass, audit events, ownership, and a required status or host policy.</p></div></article>
+      <article><span>04</span><div><h3>Failure semantics</h3><p>Confirm finding and error exit codes, timeout behaviour, fail-open paths, and actual branch-rule integration.</p></div></article>
+      <article><span>05</span><div><h3>Custom/internal formats</h3><p>When required, version engine-specific patterns, decoding settings, safe positives, negatives, and host dry runs.</p></div></article>
+      <article><span>06</span><div><h3>History and source reach</h3><p>Assign Git refs, archives, images, logs, collaboration content, object stores, and organisations to controls that can scan them.</p></div></article>
+      <article><span>07</span><div><h3>Signal and validity</h3><p>Measure noise and misses. If provider checks matter, govern egress, permissions, rate limits, credential handling, and indeterminate outcomes.</p></div></article>
+      <article><span>08</span><div><h3>Output and exception safety</h3><p>Redact values and give each narrow allowlist or bypass an owner, reason, scope, and review or expiry date.</p></div></article>
+      <article><span>09</span><div><h3>Performance and reliability</h3><p>Test representative histories, binaries, submodules, concurrency, and service limits before making a control mandatory.</p></div></article>
+      <article><span>10</span><div><h3>Operational and commercial fit</h3><p>Review routing, response, metrics, supply chain, maintenance, licence, plan, cost, and data boundary at the program layer.</p></div></article>
     </div>
     <aside class="callout recommendation">
-      <span class="callout-title">Requirements used by this repository</span>
-      <p>The blocking gate must be portable, offline, usable before commit, able to scan full Git history in CI, configurable with a versioned custom rule, and safe to report with redaction. Wider-source discovery and live validation are valuable only where the business needs them.</p>
+      <span class="callout-title">Mandatory here</span>
+      <p>The central merge control needs tested file/Git coverage, a versioned custom rule, deterministic failure behaviour, full-redaction output, and branch-protection enforcement. Wider-source discovery and provider validation are separate jobs, not reasons to reject a suitable merge gate.</p>
     </aside>
   </section>
 
   <section id="comparison">
-    <span class="section-kicker">Tested and documented comparison</span>
-    <h2>Evaluate against the same credential classes</h2>
-    <p>The local harness creates 15 credential-shaped positives and three safe negatives under <code>mktemp</code>. It covers passwords, credential URLs, authorisation headers, provider tokens, OAuth, paired cloud keys, service accounts, private and symmetric keys, webhook secrets, an internal format, encoding, runtime references, placeholders, and public keys. No test value is provider-issued or committed.</p>
-    <p>Gitleaks and TruffleHog receive equivalent custom rules. Gitleaks uses one decoding pass; TruffleHog provider checks stay disabled. GitHub's column describes current documentation and what the remote test must check—it is not presented as a local scanner result.</p>
+    <span class="section-kicker">Remote comparison</span>
+    <h2>Commit one corpus and separate CLI, host, and documented behavior</h2>
+    <p>The repository commits 15 non-issued credential-shaped positives and three safe negatives under <a href="https://github.com/llody9977/secret-scan/tree/main/testdata/synthetic"><code>testdata/synthetic/</code></a>. It covers passwords, credential URLs, authorisation headers, provider tokens, OAuth, paired cloud keys, service accounts, private and symmetric keys, webhook secrets, an internal format, encoding, runtime references, placeholders, and public keys.</p>
+    <p>Gitleaks and TruffleHog receive equivalent custom rules on a GitHub-hosted runner. Gitleaks uses one decoding pass; TruffleHog provider checks stay disabled. GitHub's column reports what the enabled host did with the same push, then adds the documented capability needed to interpret that observation.</p>
 
     <div class="table-wrap comparison-table">
       <table>
-        <thead><tr><th>Credential shape</th><th>Decision</th><th>Gitleaks 8.30.1</th><th>TruffleHog 3.97.1</th><th>GitHub docs / host test</th></tr></thead>
+        <thead><tr><th>Credential shape</th><th>Decision</th><th>Gitleaks 8.30.1 remote</th><th>TruffleHog 3.97.1 remote</th><th>GitHub host observation / documented boundary</th></tr></thead>
         <tbody>
-          <tr><td>Custom internal token</td><td>Block</td><td>Detected · <code>synthetic-demo-api-key</code></td><td>Detected · <code>CustomRegex</code></td><td>Configure, dry-run, publish, and push-protect a custom pattern</td></tr>
-          <tr><td>Username/password assignment</td><td>Block</td><td>Detected · <code>generic-api-key</code></td><td>Missed</td><td>AI-detected alert; GitHub documents no password push protection or validity check</td></tr>
-          <tr><td>PostgreSQL credential URL</td><td>Block</td><td>Missed</td><td>Detected · <code>Postgres</code></td><td>Generic alert pattern; test hosted push behaviour</td></tr>
-          <tr><td>HTTP Basic credential</td><td>Block</td><td>Missed</td><td>Missed</td><td>Generic alert pattern; test hosted alert and push behaviour</td></tr>
-          <tr><td>Bearer JWT/header</td><td>Block</td><td>Detected · <code>jwt</code></td><td>Missed</td><td>Generic Bearer-header and provider-token patterns are distinct; record which fires</td></tr>
-          <tr><td>GitHub PAT-shaped token</td><td>Block</td><td>Missed</td><td>Detected · <code>Github</code></td><td>Provider pattern; push protection is limited to supported identifiable token versions</td></tr>
-          <tr><td>OAuth client secret</td><td>Block</td><td>Detected · <code>generic-api-key</code></td><td>Missed</td><td>Depends on provider format or custom pattern</td></tr>
-          <tr><td>AWS pair in one file</td><td>Block</td><td>Detected · <code>generic-api-key</code></td><td>Detected · <code>AWS</code></td><td>AWS pair pattern supports push protection</td></tr>
-          <tr><td>AWS pair split across files</td><td>Block</td><td>Detected one generic value</td><td>Missed</td><td>GitHub documents that paired patterns require both parts in one file</td></tr>
-          <tr><td>Service-account configuration</td><td>Block</td><td>Detected · <code>private-key</code></td><td>Detected · <code>PrivateKey</code></td><td>Test provider-specific and generic private-key patterns</td></tr>
-          <tr><td>RSA private key</td><td>Block</td><td>Detected · <code>private-key</code></td><td>Detected · <code>PrivateKey</code></td><td>Generic <code>rsa_private_key</code> alert pattern</td></tr>
-          <tr><td>OpenSSH private key</td><td>Block</td><td>Detected · <code>private-key</code></td><td>Detected · <code>PrivateKey</code></td><td>Generic <code>openssh_private_key</code> alert pattern</td></tr>
-          <tr><td>Symmetric encryption key</td><td>Block</td><td>Detected · <code>generic-api-key</code></td><td>Missed</td><td>Needs a recognised provider shape or custom pattern</td></tr>
-          <tr><td>Webhook signing secret</td><td>Block</td><td>Detected · <code>generic-api-key</code></td><td>Missed</td><td>Needs a supported provider shape or custom pattern</td></tr>
-          <tr><td>Base64-encoded internal token</td><td>Block</td><td>Detected after decoding · two signals</td><td>Detected · <code>CustomRegex</code></td><td>Test encoded representations; do not assume a plain custom pattern decodes content</td></tr>
-          <tr><td>Runtime reference</td><td>Pass</td><td>Passed</td><td>Passed</td><td>Safe negative; no value is present</td></tr>
-          <tr><td>Placeholder</td><td>Pass</td><td>Passed</td><td>Passed</td><td>Safe negative; no value is present</td></tr>
-          <tr><td>SSH public key</td><td>Pass</td><td>Passed</td><td>Passed</td><td>Safe negative; a public key is not its private key</td></tr>
+          <tr><td>Custom internal token</td><td>Block</td><td>Detected · <code>synthetic-demo-api-key</code></td><td>Detected · <code>CustomRegex</code></td><td>Accepted; no alert. Repository custom-pattern API unavailable; eligible repositories can dry-run and publish one.</td></tr>
+          <tr><td>Username/password assignment</td><td>Block</td><td>Detected · <code>generic-api-key</code></td><td>No finding</td><td>Accepted; no alert. Password alerts are AI-detected; push protection and validity checks are unsupported.</td></tr>
+          <tr><td>PostgreSQL credential URL</td><td>Block</td><td>No finding</td><td>Detected · <code>Postgres</code></td><td>Accepted; no alert. A generic user-alert pattern is documented.</td></tr>
+          <tr><td>HTTP Basic credential</td><td>Block</td><td>No finding</td><td>No finding</td><td>Accepted; no alert. A generic user-alert pattern is documented.</td></tr>
+          <tr><td>Bearer JWT/header</td><td>Block</td><td>Detected · <code>jwt</code></td><td>No finding</td><td>Accepted; no alert. Generic Bearer-header and provider-token patterns differ.</td></tr>
+          <tr><td>GitHub PAT-shaped token</td><td>Block</td><td>No finding</td><td>Detected · <code>Github</code></td><td>Accepted; no alert. Push protection is limited to supported identifiable token versions.</td></tr>
+          <tr><td>OAuth client secret</td><td>Block</td><td>Detected · <code>generic-api-key</code></td><td>No finding</td><td>Accepted; no alert. Coverage depends on provider format or custom pattern.</td></tr>
+          <tr><td>AWS pair in one file</td><td>Block</td><td>Detected · <code>generic-api-key</code></td><td>Detected · <code>AWS</code></td><td>Accepted; no alert. AWS pair push protection is documented; this pair was non-issued.</td></tr>
+          <tr><td>AWS pair split across files</td><td>Block</td><td>Detected one generic value</td><td>No finding</td><td>Accepted; no alert. GitHub documents that paired patterns need both parts in one file.</td></tr>
+          <tr><td>Service-account configuration</td><td>Block</td><td>Detected · <code>private-key</code></td><td>Detected · <code>PrivateKey</code></td><td>Accepted; no alert. Provider-specific and generic private-key patterns differ.</td></tr>
+          <tr><td>RSA private key</td><td>Block</td><td>Detected · <code>private-key</code></td><td>Detected · <code>PrivateKey</code></td><td>Accepted; no alert. A generic <code>rsa_private_key</code> user-alert pattern is documented.</td></tr>
+          <tr><td>OpenSSH private key</td><td>Block</td><td>Detected · <code>private-key</code></td><td>Detected · <code>PrivateKey</code></td><td>Accepted; no alert. A generic <code>openssh_private_key</code> user-alert pattern is documented.</td></tr>
+          <tr><td>Symmetric encryption key</td><td>Block</td><td>Detected · <code>generic-api-key</code></td><td>No finding</td><td>Accepted; no alert. Needs a recognised provider shape or custom pattern.</td></tr>
+          <tr><td>Webhook signing secret</td><td>Block</td><td>Detected · <code>generic-api-key</code></td><td>No finding</td><td>Accepted; no alert. Needs a supported provider shape or custom pattern.</td></tr>
+          <tr><td>Base64-encoded internal token</td><td>Block</td><td>Detected after decoding · two signals</td><td>Detected · <code>CustomRegex</code></td><td>Accepted; no alert. Base64 support is pattern-specific.</td></tr>
+          <tr><td>Runtime reference</td><td>Pass</td><td>Passed</td><td>Passed</td><td>Accepted; no alert. No credential value is present.</td></tr>
+          <tr><td>Placeholder</td><td>Pass</td><td>Passed</td><td>Passed</td><td>Accepted; no alert. No credential value is present.</td></tr>
+          <tr><td>SSH public key</td><td>Pass</td><td>Passed</td><td>Passed</td><td>Accepted; no alert. A public key is not its private key.</td></tr>
         </tbody>
       </table>
     </div>
 
-    <p><strong>Local result:</strong> Gitleaks detected 12 of 15 positives; TruffleHog detected eight. These are not production accuracy rates: the scenarios are deliberately diverse rather than statistically sampled, and the encoded case creates two Gitleaks signals. The useful findings are the individual gaps. Both missed Basic auth; Gitleaks missed the PostgreSQL URL and PAT shape; TruffleHog missed several generic, JWT, OAuth, symmetric, and webhook shapes.</p>
+    <p><strong>Remote result:</strong> in <a href="https://github.com/llody9977/secret-scan/actions/runs/32818011678">Actions run 32818011678</a>, Gitleaks reported 12 of 15 positives and TruffleHog reported eight; both passed three negatives. The <a href="https://github.com/llody9977/secret-scan/actions/runs/32818011678/artifacts/9552099737">machine-readable artifact</a> identifies the runner, commit, manifest digest, detector names, and exit codes. These are regression outcomes, not production accuracy rates.</p>
 
     <aside class="callout note">
-      <span class="callout-title">GitHub is included without inventing a local result</span>
-      <p>GitHub Secret Protection runs at the host. Its current documentation covers provider, generic, AI-detected, and custom patterns, but alerting and push blocking differ. The <a href="https://github.com/llody9977/secret-scan/blob/main/results/github-secret-protection-test-procedure.md">disposable-host procedure</a> maps these scenarios to a remote test and records plan, settings, pattern, block, bypass, and alert outcomes.</p>
+      <span class="callout-title">GitHub is an observed host result, not a simulated regex</span>
+      <p>Secret scanning and push protection were enabled. GitHub accepted <a href="https://github.com/llody9977/secret-scan/commit/00feb11a9db6af732a82ce769dd0334af9a7629e">the corpus commit</a> without offering a bypass; the sanitized API export returned no repository alert at the recorded query time, and custom patterns were unavailable. See the <a href="https://github.com/llody9977/secret-scan/blob/main/results/github-secret-protection-results.json">host result JSON</a>. Non-issued shapes do not establish how current provider-issued credentials behave.</p>
     </aside>
 
-    <h3>Capabilities explain where each tool belongs</h3>
+    <h3>The ten criteria explain where each control belongs</h3>
     <div class="table-wrap comparison-table">
       <table>
-        <thead><tr><th>Decision factor</th><th>Gitleaks 8.30.1</th><th>TruffleHog 3.97.1</th><th>GitHub Secret Protection</th></tr></thead>
+        <thead><tr><th>Evaluation criterion</th><th>Gitleaks 8.30.1</th><th>TruffleHog 3.97.1</th><th>GitHub Secret Protection here</th></tr></thead>
         <tbody>
-          <tr><th>Best fit</th><td>Portable, offline local and CI gate over files and Git history</td><td>Discovery across many repositories and non-Git sources, with optional provider checks</td><td>GitHub-native push prevention, alerting, governance, and organisation visibility</td></tr>
-          <tr><th>Detection model</th><td>Built-in and custom regex, keywords, entropy, and configurable decoding</td><td>Provider detectors plus custom detectors; many can check provider APIs</td><td>Provider, generic, AI-detected, and custom patterns with platform-managed updates</td></tr>
-          <tr><th>Custom/internal formats</th><td>TOML regex, keywords, entropy, allowlists, and versioned fixtures</td><td>Keywords and named regexes, optional character constraints and webhook check; documented as alpha</td><td>Dry-run and publish repository, organisation, or enterprise patterns; optionally enable push protection</td></tr>
-          <tr><th>Validity checks</th><td>No provider login check; suitable offline</td><td>Can contact issuing APIs; outcomes can be active, inactive, unknown, or not checked</td><td>Validity checks for supported patterns and provider partnerships for some public leaks</td></tr>
-          <tr><th>Gate semantics</th><td>Pre-commit plus configurable nonzero exit and redacted reports</td><td>Pre-commit/CI; <code>--fail</code> uses exit 183; raw JSON needs careful handling</td><td>Native push protection, bypass governance, alerts, overview, and remediation workflow</td></tr>
-          <tr><th>Source reach</th><td>Git history, filesystem, stdin, and configured archives</td><td>GitHub organisations and collaboration content, GitLab, Docker/images, S3, GCS, Postman, Jenkins, filesystems, and more</td><td>GitHub history, pull requests, issues, wikis, discussions, and public monitoring</td></tr>
-          <tr><th>Cost / licence</th><td>Open-source MIT binary</td><td>Open-source AGPL-3.0 binary; separate enterprise service</td><td>Core scanning is free for public repositories; much private/internal use needs Secret Protection and an eligible plan</td></tr>
-          <tr><th>Main caveat</th><td>No provider validity check; operators own local rules and upgrades</td><td>Provider checks require approved egress; raw output can contain matches; custom detectors are alpha</td><td>GitHub-specific and plan-gated for much private use; pattern, size, timeout, pair, version, and bypass limits apply</td></tr>
+          <tr><th>1. Coverage fit</th><td>Remote: 12/15 positives and 3/3 negatives</td><td>Remote: 8/15 positives and 3/3 negatives</td><td>Push accepted and no alert returned; documented categories are broader than this non-issued result</td></tr>
+          <tr><th>2. Placement and timing</th><td>Working tree, staged changes, pre-push, Git history, CI, and schedule</td><td>Filesystem, Git/CI, schedule, source discovery, and triage</td><td>Native GitHub push boundary plus asynchronous monitoring</td></tr>
+          <tr><th>3. Enforcement and governance</th><td>Governed when CI is required and branch bypass is restricted; hooks alone are not central</td><td>Governed only if required or centrally scheduled; non-blocking here</td><td>Host policy and bypass governance; no bypass was offered in this run</td></tr>
+          <tr><th>4. Failure semantics</th><td>Configurable finding exit; workflow also checks report and expected rule</td><td><code>--fail</code> uses 183; scan errors fail separately</td><td>Server block/accept with documented timeout and size limits</td></tr>
+          <tr><th>5. Custom/internal formats</th><td>Versioned TOML rule, decoding, and committed regression cases</td><td>YAML custom detector; documented as alpha</td><td>Repository endpoint returned “feature not available”; eligible repositories support dry run and publishing</td></tr>
+          <tr><th>6. History and source reach</th><td>Filesystem, Git history, stdin, and configured archives</td><td>Organisations, collaboration content, GitLab, images, object stores, CI systems, and more</td><td>GitHub history and supported collaboration surfaces, subject to plan and feature availability</td></tr>
+          <tr><th>7. Signal and validity</th><td>Offline; no provider login check</td><td>Optional provider checks can classify outcomes; disabled here</td><td>Pattern-specific validity checks exist; disabled in this repository</td></tr>
+          <tr><th>8. Output and exceptions</th><td>Full redaction asserted; production allowlist limited to the corpus path</td><td>Raw JSON stays ephemeral; production discovery excludes the same corpus path</td><td>Alert and bypass metadata support governance; access and retention need policy</td></tr>
+          <tr><th>9. Performance and reliability</th><td>Large-history performance not measured</td><td>Organisation/source and provider latency not measured</td><td>Managed service with documented push size, count, timeout, and pattern limits</td></tr>
+          <tr><th>10. Operational/commercial fit</th><td>MIT; portable; operators own rules, upgrades, routing, and response</td><td>AGPL-3.0 CLI; enterprise service separate; egress and raw-output decisions matter</td><td>Native GitHub workflow; public core is free, while custom/private/internal capabilities depend on ownership and plan</td></tr>
         </tbody>
       </table>
     </div>
 
+    <p>The table has no winner column because the rows are not universally mandatory for one product. Here, required CI supplies portable custom merge policy, GitHub supplies the earlier shared boundary for patterns it covers, and TruffleHog remains a second detector and wider-source discovery option.</p>
+
     <h3>Why TruffleHog is described as broad discovery</h3>
-    <p>“Broad” refers to <strong>where it can search and whether it can check candidates with providers</strong>, not a claim that it detects every file shape better. It can enumerate sources beyond one checkout—such as repositories across a GitHub organisation, some collaboration content, object stores, container images, and CI systems. Its experimental GitHub object discovery can also inspect some hidden or deleted objects, with maturity and runtime caveats. The local matrix reinforces the distinction: TruffleHog found two shapes Gitleaks missed and also missed shapes Gitleaks found.</p>
+    <p>“Broad” refers to <strong>where it can search and whether it can check candidates with providers</strong>, not a claim that it detects every file shape better. It can enumerate sources beyond one checkout—such as repositories across a GitHub organisation, some collaboration content, object stores, container images, and CI systems. The remote matrix reinforces the distinction: TruffleHog found PostgreSQL and GitHub-token shapes that Gitleaks missed, and also missed shapes Gitleaks found.</p>
 
     <h3>Custom formats need their own miniature test suite</h3>
     <ul>
       <li><strong>Gitleaks:</strong> version a TOML rule with keywords and regex; add entropy or narrow allowlists only when required.</li>
       <li><strong>TruffleHog:</strong> configure keywords and one or more named regexes; optional character requirements and webhook checks add structure, but the feature is documented as alpha.</li>
-      <li><strong>GitHub:</strong> dry-run before publishing a custom pattern, then enable its push protection only after reviewing likely disruption and confirming repository push protection.</li>
+      <li><strong>GitHub:</strong> on an eligible repository, dry-run before publishing a custom pattern and enabling push protection. This repository's endpoint returned “feature not available.”</li>
     </ul>
     <p>Keep safe positives for every supported version of an internal format and negatives for placeholders, public identifiers, examples, and near-matches. Re-run them after pattern, scanner, decoding, or host-setting changes.</p>
 
@@ -316,54 +326,54 @@
     <ul>
       <li>Fifteen positives and three negatives are a regression matrix, not enough to estimate production false-positive or false-negative rates.</li>
       <li>Inputs are non-issued shapes, provider checks are disabled, and no result says whether a credential is active.</li>
-      <li>GitHub behavior has not been run locally; documented capability and the pending remote result are kept distinct.</li>
+      <li>GitHub accepted one commit containing all scenarios; no block was offered, so bypass governance was not exercised.</li>
+      <li>The alert export is a point-in-time observation. Non-issued shapes, asynchronous timing, disabled validity checks, and unavailable custom patterns limit the conclusion.</li>
       <li>TruffleHog JSON can contain raw matches, so the harness keeps it temporary and persists only safe metadata; Gitleaks reports are fully redacted.</li>
       <li>No large-history, archive, image, non-Git source, collaboration-surface, provider-latency, or operating-cost benchmark was performed.</li>
     </ul>
   </section>
 
   <section id="recommendation">
-    <span class="section-kicker">Decision and gate map</span>
-    <h2>Assign one job to each gate</h2>
+    <span class="section-kicker">Practical operating model</span>
+    <h2>Govern shared boundaries and keep local controls as feedback</h2>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Gate and purpose</th><th>Default here</th><th>When to add or change it</th><th>Blocking?</th></tr></thead>
+        <thead><tr><th>Practice</th><th>Implementation here</th><th>Governance assessment</th><th>Recommendation</th></tr></thead>
         <tbody>
-          <tr><td>Before a commit object exists</td><td>Gitleaks staged-content pre-commit hook</td><td>Add IDE feedback if it uses the same tested rules</td><td>Local only; manually installed and bypassable</td></tr>
-          <tr><td>Before local commits leave a clone</td><td>Gitleaks full-history pre-push hook</td><td>Keep when developer latency is acceptable</td><td>Local only; manually installed and bypassable</td></tr>
-          <tr><td>At the GitHub push boundary</td><td>GitHub push protection when eligible</td><td>Add custom patterns; do not assume every alert pattern blocks</td><td>Yes for supported configured patterns, subject to limits</td></tr>
-          <tr><td>Every pushed commit and pull request</td><td>Gitleaks full-history workflow</td><td>Make <strong>Gitleaks full-history gate</strong> the required PR status</td><td>Blocks merge when required; branch content is already remote</td></tr>
-          <tr><td>Merge push to the target branch</td><td>The same Gitleaks workflow runs again</td><td>Retains a central check after local-hook absence or bypass</td><td>Detective after the merge push</td></tr>
-          <tr><td>Daily regression/history scan</td><td>The same Gitleaks workflow runs on schedule</td><td>Detects default-branch history and configuration drift</td><td>Detective</td></tr>
-          <tr><td>Wider-source or possible active-credential discovery</td><td>Weekly/manual TruffleHog workflow; provider checks off here</td><td>Add approved sources or checks only when the business case permits</td><td>Detective by default</td></tr>
-          <tr><td>Tool evaluation and upgrades</td><td>Controlled 18-scenario comparison on pushes and PRs</td><td>Add organisation-specific cases and review changed outcomes</td><td>Never the merge gate</td></tr>
+          <tr><td>Before commit</td><td>Gitleaks staged-content hook</td><td>Per-clone and bypassable</td><td>Offer fast feedback; do not count installation as organisation-wide enforcement</td></tr>
+          <tr><td>Before developer push</td><td>Gitleaks full-history pre-push hook</td><td>Per-clone, bypassable, and potentially slower</td><td>Keep as contributor convenience; central policy must not depend on it</td></tr>
+          <tr><td>GitHub push boundary</td><td>GitHub push protection</td><td>Centrally configured with bypass governance, but limited to supported/configured patterns</td><td>Enable and test actual plan, pattern versions, limits, and bypass authority</td></tr>
+          <tr><td>Every branch and PR</td><td>Gitleaks full-history workflow</td><td>Centrally visible; governs merge only when required and bypass/direct push are restricted</td><td>Require <strong>Gitleaks full-history gate</strong> and fail on scanner error</td></tr>
+          <tr><td>After merge and daily</td><td>The same Gitleaks workflow</td><td>Centrally scheduled detective control</td><td>Route findings to an owner and measure remediation time</td></tr>
+          <tr><td>Wider sources</td><td>Weekly/manual TruffleHog; provider checks disabled</td><td>Centrally scheduled but non-blocking</td><td>Add approved sources or provider checks only for a named risk gap</td></tr>
+          <tr><td>Tool and rule changes</td><td>Remote checked-in-corpus workflow</td><td>Repeatable per-scenario assertions, summary, and artifact</td><td>Keep non-blocking; review changed results before production policy changes</td></tr>
         </tbody>
       </table>
     </div>
 
-    <p>Local hooks improve feedback but cannot enforce organisation policy: every clone must install them and can bypass them. Central CI is therefore required for this baseline. The workflow runs on every push and pull request, on the push produced by a merge, daily, and by manual dispatch.</p>
+    <p>The practical design combines controls with different authority: local feedback, host prevention for covered patterns, required portable CI for merge policy and internal formats, and centrally scheduled discovery. Restrict direct pushes and administrative bypass if CI is meant to govern every production change.</p>
 
     <div class="choice-grid">
       <article class="choice gitleaks">
-        <span class="choice-label">If choosing one</span>
-        <h3>Use Gitleaks as the portable baseline</h3>
-        <p>It meets the offline local/CI, custom-rule, decoding, and redaction requirements and found 12 of 15 positives here. That is a scoped choice, not a universal product ranking.</p>
+        <span class="choice-label">Portable policy</span>
+        <h3>Use Gitleaks as the merge baseline</h3>
+        <p>It supports versioned custom rules, history, full redaction, local feedback, and required CI. The remote corpus supports this assignment, not a universal ranking.</p>
       </article>
       <article class="choice github">
-        <span class="choice-label">If GitHub-eligible</span>
-        <h3>Add native push protection next</h3>
-        <p>It can stop supported configured patterns before CI. Test passwords, token versions, paired values, custom formats, push size/timeouts, and bypass settings; documented alerts do not all block.</p>
+        <span class="choice-label">Shared prevention</span>
+        <h3>Enable native push protection</h3>
+        <p>It can stop supported configured patterns before CI. This corpus was accepted, so test current provider versions, custom-pattern eligibility, service limits, and bypass settings.</p>
       </article>
       <article class="choice trufflehog">
-        <span class="choice-label">If a measured gap remains</span>
+        <span class="choice-label">Named residual gap</span>
         <h3>Add TruffleHog deliberately</h3>
         <p>Use its different detectors, source connectors, or provider checks for a named need. Promote it to CI only after measuring incremental coverage, noise, latency, egress, report safety, and licence impact.</p>
       </article>
     </div>
 
     <aside class="callout recommendation">
-      <span class="callout-title">A risk-based conclusion, not “use all tools”</span>
-      <p>GitHub push protection may leave a residual gap because of plan, configuration, pattern, token-version, pair, size, timeout, or bypass limits. An organisation can close a material gap with a custom rule or second CI scanner, keep a second engine as scheduled discovery, or accept the gap with an owner and review date. Choose from the secret inventory and test results, not the product count.</p>
+      <span class="callout-title">A governed stack, not “use all tools everywhere”</span>
+      <p>Close a material host gap with a custom portable rule, an eligible host pattern, a justified second CI scanner, or frequent discovery. Otherwise accept it explicitly with an owner and review date. Choose from the secret inventory, remote scenario results, and governance model—not the product count.</p>
     </aside>
   </section>
 
@@ -398,9 +408,9 @@
   </section>
 
   <section id="results">
-    <span class="section-kicker">Controlled test</span>
-    <h2>The workflow reproduces the comparison without committing a secret</h2>
-    <p>The corpus is assembled only in temporary storage. The comparison asserts exact finding counts, detector names, and exit codes; outbound provider checks stay off.</p>
+    <span class="section-kicker">Direct hosted results</span>
+    <h2>The committed corpus runs remotely and leaves durable safe metadata</h2>
+    <p><a href="https://github.com/llody9977/secret-scan/tree/main/testdata/synthetic">The corpus</a> and its manifest are source-controlled. The remote workflow copies that exact directory, rejects duplicate targets and unmanifested fixtures, asserts each scanner outcome, publishes the full table in the job summary, and uploads machine-readable JSON. Provider checks stay off.</p>
 
     <div class="results-panel">
       <div class="terminal-head"><span></span><span></span><span></span><strong>make compare</strong></div>
@@ -412,33 +422,41 @@ basic-header                  | missed                     | missed
 github-pat                    | missed                     | <span class="clean">detected</span>
 positive scenarios detected  | <span class="clean">12 / 15</span>                    | <span class="clean">8 / 15</span>
 safe negatives passed         | <span class="clean">3 / 3</span>                     | <span class="clean">3 / 3</span>
-provider checks: disabled · fixtures: temporary · persisted output: metadata only</code></pre>
+provider checks: disabled · fixtures: checked in · persisted output: safe metadata only</code></pre>
     </div>
 
     <div class="results-grid">
       <article>
-        <span class="result blocked">Required gate candidate</span>
-        <h3>Gitleaks full-history gate</h3>
-        <p>The workflow runs on pushes, pull requests, merge pushes, daily, and manually. It runs the small gate test and scans complete checked-out Git history. This is the only status this repository recommends making required.</p>
+        <span class="result blocked">Required main status</span>
+        <h3>Production Gitleaks gate</h3>
+        <p><a href="https://github.com/llody9977/secret-scan/actions/runs/32818011673">Run 32818011673</a> passed. The production scan excludes only the intentional corpus path. Main branch protection requires this status, although admin enforcement is disabled.</p>
       </article>
       <article>
-        <span class="result passed">Optional comparison</span>
-        <h3>Comparison and discovery</h3>
-        <p>The cross-engine workflow is labelled <strong>Comparison only — not a merge gate</strong>. TruffleHog's separate weekly/manual workflow is detective and keeps raw JSON in temporary runner storage.</p>
+        <span class="result passed">Remote evaluation</span>
+        <h3>Gitleaks + TruffleHog corpus run</h3>
+        <p><a href="https://github.com/llody9977/secret-scan/actions/runs/32818011678">Run 32818011678</a> passed all manifest assertions. Its job remains explicitly non-blocking; TruffleHog raw JSON stayed in ephemeral runner storage.</p>
+      </article>
+      <article>
+        <span class="result passed">Host observation</span>
+        <h3>GitHub Secret Protection</h3>
+        <p>The corpus push was accepted without a bypass. The sanitized export returned no repository alert at the query time and recorded that custom patterns were unavailable.</p>
       </article>
     </div>
 
     <div class="artifact-links" aria-label="Test result files">
-      <a href="https://github.com/llody9977/secret-scan/blob/main/results/scanner-comparison-results.json"><span>Comparison JSON</span><small>Captured metadata for both engines</small></a>
-      <a href="https://github.com/llody9977/secret-scan/blob/main/scripts/compare-secret-scanners.sh"><span>Comparison harness</span><small>Temporary corpus and exact assertions</small></a>
-      <a href="https://github.com/llody9977/secret-scan/tree/main/.github/workflows"><span>Workflow gates</span><small>Required candidate, comparison, and discovery</small></a>
-      <a href="https://github.com/llody9977/secret-scan/blob/main/results/github-secret-protection-test-procedure.md"><span>GitHub host test</span><small>Disposable-repository matrix and recording procedure</small></a>
-      <a href="https://github.com/llody9977/secret-scan/blob/main/results/README.md"><span>Test conditions</span><small>Scope and limitations</small></a>
+      <a href="https://github.com/llody9977/secret-scan/actions/runs/32818011678"><span>Remote workflow run</span><small>Job summary, steps, versions, and logs</small></a>
+      <a href="https://github.com/llody9977/secret-scan/actions/runs/32818011678/artifacts/9552099737"><span>Remote JSON artifact</span><small>Machine-readable result retained for 90 days</small></a>
+      <a href="https://github.com/llody9977/secret-scan/blob/main/results/scanner-comparison-results.json"><span>Durable CLI snapshot</span><small>Remote provenance and both engines</small></a>
+      <a href="https://github.com/llody9977/secret-scan/blob/main/results/github-secret-protection-results.json"><span>GitHub host result</span><small>Push, settings, alerts, and feature availability</small></a>
+      <a href="https://github.com/llody9977/secret-scan/tree/main/testdata/synthetic"><span>Checked-in corpus</span><small>Fixtures, manifest, and extension procedure</small></a>
+      <a href="https://github.com/llody9977/secret-scan/blob/main/scripts/compare-secret-scanners.sh"><span>Comparison harness</span><small>Manifest assertions and safe result handling</small></a>
+      <a href="https://github.com/llody9977/secret-scan/tree/main/.github/workflows"><span>Workflow gates</span><small>Required status, comparison, and discovery</small></a>
+      <a href="https://github.com/llody9977/secret-scan/blob/main/results/github-secret-protection-test-procedure.md"><span>Repeat the host test</span><small>Safe push and sanitized export procedure</small></a>
     </div>
 
     <aside class="callout note">
       <span class="callout-title">How to read these results</span>
-      <p>Under the listed versions and conditions, the scanners returned the recorded detector names, counts, and exit codes for 18 scenarios. The run does not measure universal coverage, credential validity, production accuracy, GitHub feature configuration, or absence of secrets.</p>
+      <p>Under the recorded commit, manifest, versions, runner, and settings, the tools returned the listed outcomes. The run does not measure universal coverage, credential validity, production accuracy, large-repository performance, or absence of secrets.</p>
     </aside>
   </section>
 
@@ -450,7 +468,7 @@ provider checks: disabled · fixtures: temporary · persisted output: metadata o
       <li>Remove long-lived credentials through workload identity or dynamic secrets where possible.</li>
       <li>Use Gitleaks at pre-commit and pre-push for local feedback, then enforce the same rules centrally because hooks are manually installed and bypassable.</li>
       <li>Run central CI on every push and pull request, on merge pushes, and daily; make <strong>Gitleaks full-history gate</strong> the required branch or ruleset status.</li>
-      <li>Add GitHub push protection when eligible, configure internal formats, and run the disposable-host matrix before relying on the gate.</li>
+      <li>Enable GitHub push protection when eligible, configure internal formats where the plan supports them, and test the actual repository settings, current token versions, limits, and bypass policy.</li>
       <li>Add TruffleHog when its different detectors, broader discovery, or provider checks close a named business-risk gap.</li>
       <li>Keep scanner jobs least-privileged, pinned, checksum-checked, redacted, and isolated from unrelated secrets.</li>
       <li>Maintain safe positive and negative fixtures for provider and custom rules.</li>
@@ -485,7 +503,7 @@ provider checks: disabled · fixtures: temporary · persisted output: metadata o
 
   <aside class="closing">
     <span class="section-kicker">What to remember</span>
-    <p>Secret scanning is a layered control, not a guarantee of absence and not a secret store. Block matching values before commit, enforce again at the shared repository boundary, and design every real credential for least privilege, short lifetime, audit, rotation, and revocation.</p>
+    <p>Secret scanning is a layered control, not a guarantee of absence and not a secret store. Use local scans for feedback, govern prevention at the host boundary where possible, enforce portable policy in required CI, and design every real credential for least privilege, short lifetime, audit, rotation, and revocation.</p>
   </aside>
 </main>
 

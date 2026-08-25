@@ -1,0 +1,2 @@
+# Base64 of the fictional demo-user password pair.
+Authorization: Basic ZGVtby11c2VyOlA5LWYyNWRlMzA0ZTRlMzJjZTZjZTU2NDM1Zjc1M2E=

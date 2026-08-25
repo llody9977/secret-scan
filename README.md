@@ -1,4 +1,4 @@
-# Secret scanning reduces credential-leak risk
+# Secret scanning: control effectiveness and governance
 
 ![CI](https://github.com/llody9977/secret-scan/actions/workflows/ci.yml/badge.svg)
 ![CodeQL](https://github.com/llody9977/secret-scan/actions/workflows/codeql.yml/badge.svg)
@@ -6,72 +6,49 @@
 ![Pages](https://github.com/llody9977/secret-scan/actions/workflows/pages.yml/badge.svg)
 ![License](https://img.shields.io/github/license/llody9977/secret-scan)
 
-A secret in source code can turn access to a repository into access to cloud accounts, databases, CI/CD, package registries, or production systems. The repository does not need to be public: compromised identities, developer clones, automation, backups, and integrations can all expose values stored with code.
+A scanner is only one part of a secret-scanning control. Effective protection also depends on where it runs, whether the organization can enforce it, how bypass and failures are governed, and whether findings lead to revocation and remediation.
 
-The engineering rule is straightforward: **catch matching values before commit, enforce the decision again at the shared repository boundary, and store real credentials in a system designed for audit, rotation, expiry, and revocation.** A clean scan means only that the configured detectors did not report a match.
+**[Read the full GitHub Pages guide →](https://llody9977.github.io/secret-scan/)**
 
-The recommended baseline here is **Gitleaks at pre-commit, pre-push, and central CI**. The CI scan runs on every push and pull request, again when a merge pushes the target branch, and daily; make its pull-request status required. If the repository is eligible, add **GitHub push protection at the hosted push boundary**. Add **TruffleHog as scheduled discovery or authorised incident triage** when its different detector results, wider-source reach, or provider checks justify the network, data-handling, latency, and licence trade-offs. This is not a recommendation to run every engine at every gate.
+## Practical recommendation
 
-**[▶ Read the full illustrated guide →](https://llody9977.github.io/secret-scan/)**
+- Use pre-commit and pre-push hooks for fast developer feedback; they are per-clone and bypassable, so they are not organization-wide enforcement.
+- Enable host push protection for the supported patterns that must not reach the remote. Test the actual plan, pattern versions, service limits, and bypass policy.
+- Require a portable CI scanner for merge policy and internal formats. In this repository that role belongs to **Gitleaks full-history gate**.
+- Add TruffleHog as scheduled or wider-source discovery when its distinct detectors, source connectors, or approved provider checks close a named risk gap.
 
-The web guide covers:
+This is not a recommendation to run every engine at every gate.
 
-- what qualifies as a secret and how exposure becomes business risk;
-- the Uber, GitHub/npm, and CircleCI incidents;
-- what to do when a secret reaches Git;
-- where pre-commit, pre-push, push-protection, CI, scheduled, and artifact gates belong;
-- what to evaluate before choosing a scanner;
-- an 18-scenario Gitleaks/TruffleHog comparison plus GitHub's documented behavior and a hosted-test procedure;
-- which tool belongs at which gate, and when a second engine is justified; and
-- workload identity, secret managers, Kubernetes, CI/CD, and local-development storage patterns.
+## Hosted corpus result
 
-## Reproduce the test results
+The repository commits 15 fictional credential-shaped positives and three safe negatives under [`testdata/synthetic/`](testdata/synthetic/). No value was provider-issued; the private keys are newly generated untrusted test keys.
 
-The baseline gate test uses Gitleaks 8.30.1 and a fictional value created only under `mktemp`:
+| Control | Observed result for this corpus | Assigned role here |
+| --- | --- | --- |
+| Gitleaks 8.30.1 | 12/15 positive scenarios reported; 3/3 negatives passed | Required main-branch status plus local feedback; admin enforcement remains disabled |
+| TruffleHog 3.97.1 | 8/15 positive scenarios reported; 3/3 negatives passed | Non-blocking regression and scheduled discovery |
+| GitHub Secret Protection | Corpus push accepted without a block; sanitized alert export returned no corpus alert; repository custom patterns were unavailable | Host prevention for supported patterns, with a portable CI layer for residual gaps |
 
-```sh
-make check
-```
+These are per-scenario regression outcomes, not production accuracy rates. See the [GitHub Actions run](https://github.com/llody9977/secret-scan/actions/runs/32818011678), [machine-readable artifact](https://github.com/llody9977/secret-scan/actions/runs/32818011678/artifacts/9552099737), [durable result snapshot](results/scanner-comparison-results.json), and [GitHub host result](results/github-secret-protection-results.json).
 
-Expected result:
+The production scans exclude only the intentional corpus path. The separate remote evaluation workflow copies and scans that directory explicitly, rejects unmanifested fixtures, asserts every scenario outcome, publishes a job summary, and uploads safe metadata. Raw TruffleHog matches remain ephemeral; Gitleaks reports must pass a full-redaction check.
 
-```text
-hardcoded-synthetic: blocked (exit 1, findings 1)
-runtime-reference: passed (exit 0, findings 0)
-scanner: gitleaks 8.30.1; provider checks: disabled; reports: redacted
-```
+## Re-run or extend the evaluation
 
-Under this configuration, the test blocks its controlled positive case and permits its runtime-reference negative case. It does not measure universal secret coverage or contact any credential provider.
-
-For the like-for-like comparison, install Gitleaks 8.30.1 and TruffleHog 3.97.1, then run:
+After installing the pinned Gitleaks and TruffleHog versions:
 
 ```sh
 make compare
 ```
 
-The corpus covers passwords, credential URLs, authorization headers, provider tokens, OAuth, paired cloud keys, service accounts, private and symmetric keys, webhook secrets, an internal format, encoding, and safe negatives. Gitleaks detected 12 of 15 positive scenarios; TruffleHog detected eight. These are configuration-specific regression results, not production accuracy rates or a universal ranking. The [web guide](https://llody9977.github.io/secret-scan/#comparison) explains each gap, GitHub's documented coverage, and the selection criteria.
+To add an internal or provider format, add a non-issued fixture and update [`testdata/synthetic/manifest.json`](testdata/synthetic/manifest.json). The remote workflow will rerun on the same committed inputs. Review changes by scenario rather than treating the total count as a product score.
 
-## Enable the gates
+Key files:
 
-```sh
-make install-hooks
-```
+- [`secret-scanning.md`](secret-scanning.md) — source article with references.
+- [`docs/`](docs/) — full-width responsive GitHub Pages version.
+- [`.github/workflows/scanner-comparison.yml`](.github/workflows/scanner-comparison.yml) — remote Gitleaks/TruffleHog evaluation.
+- [`.github/workflows/gitleaks.yml`](.github/workflows/gitleaks.yml) — centrally required full-history gate.
+- [`results/`](results/) — remote result snapshots, conditions, and limitations.
 
-This installs a staged-content pre-commit scan and a full-history pre-push scan. Those hooks are per-clone and bypassable, so the GitHub workflow repeats the full-history scan on every push and pull request, on merge pushes, and daily. After hosting, make **Gitleaks full-history gate** a required pull-request status check. Keep **Comparison only — not a merge gate** optional; the scheduled TruffleHog workflow is a detective control, not a merge gate.
-
-## Structure
-
-- [`docs/`](docs/) — the GitHub Pages article and responsive styles.
-- [`scripts/test-secret-scan.sh`](scripts/test-secret-scan.sh) — Gitleaks gate test.
-- [`scripts/compare-secret-scanners.sh`](scripts/compare-secret-scanners.sh) — controlled Gitleaks/TruffleHog comparison.
-- [`testdata/`](testdata/) — safe placeholder and runtime-reference fixtures.
-- [`results/`](results/) — captured machine-readable results and the GitHub-hosted test procedure.
-- [`.gitleaks.toml`](.gitleaks.toml) and [`.trufflehog.yml`](.trufflehog.yml) — built-ins plus equivalent fictional test rules.
-- [`.github/workflows/`](.github/workflows/) — required-gate candidate, comparison run, scheduled discovery, CI, and Pages deployment.
-- [`reviews/`](reviews/) — review record and durable content decisions.
-
-## Security, scope, and licence
-
-This repository is for educational and defensive use on systems you own or are explicitly authorised to test. It contains no live credential and makes no outbound provider checks. Report vulnerabilities privately through [`SECURITY.md`](SECURITY.md) and read [`DISCLAIMER.md`](DISCLAIMER.md) before adapting the demonstration.
-
-Licensed under [Apache-2.0](LICENSE).
+Apache-2.0. Defensive testing only; use systems you own or are authorized to assess.

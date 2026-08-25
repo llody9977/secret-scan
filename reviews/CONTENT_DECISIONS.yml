@@ -4,7 +4,7 @@
     {
       "id": "CD-0001",
       "title": "Materialize fictional credentials only in temporary test storage",
-      "status": "accepted",
+      "status": "superseded",
       "implementation_state": "implemented",
       "scope": {
         "files": [
@@ -44,7 +44,7 @@
       ],
       "related_decisions": ["CD-0002"],
       "supersedes": [],
-      "superseded_by": null,
+      "superseded_by": "CD-0008",
       "originated_on": "2026-08-25",
       "last_reviewed_on": "2026-08-25"
     },
@@ -309,7 +309,7 @@
     {
       "id": "CD-0007",
       "title": "Use a representative credential matrix and distinguish detector coverage from source reach",
-      "status": "accepted",
+      "status": "superseded",
       "implementation_state": "implemented",
       "scope": {
         "files": [
@@ -378,6 +378,90 @@
       ],
       "related_decisions": ["CD-0001", "CD-0002", "CD-0004", "CD-0006"],
       "supersedes": ["CD-0005"],
+      "superseded_by": "CD-0008",
+      "originated_on": "2026-08-25",
+      "last_reviewed_on": "2026-08-25"
+    },
+    {
+      "id": "CD-0008",
+      "title": "Use a checked-in remote corpus and assess the governed control system",
+      "status": "accepted",
+      "implementation_state": "implemented",
+      "scope": {
+        "files": [
+          "README.md",
+          "secret-scanning.md",
+          "docs/index.html",
+          "docs/styles.css",
+          "testdata/synthetic/README.md",
+          "testdata/synthetic/manifest.json",
+          "scripts/compare-secret-scanners.sh",
+          "results/scanner-comparison-results.json",
+          "results/github-secret-protection-results.json",
+          "results/github-secret-protection-test-procedure.md",
+          ".github/workflows/scanner-comparison.yml",
+          ".github/workflows/gitleaks.yml",
+          ".github/workflows/trufflehog-discovery.yml"
+        ],
+        "concepts": [
+          "checked-in non-issued credential corpus",
+          "direct hosted scanner results",
+          "GitHub host observation",
+          "evaluation criteria versus product requirements",
+          "detection effectiveness",
+          "implementation enforcement and governance",
+          "responsive full-width article"
+        ]
+      },
+      "originating_feedback": "The scanner results must come from the checked-in synthetic corpus running on GitHub, GitHub Secret Protection must appear in the effectiveness comparison, the ten items must be framed as conditional evaluation criteria rather than universal product requirements, and gate advice must address implementation and governance as well as detection.",
+      "decision": "Commit an explicitly non-issued 18-scenario corpus and manifest; exclude only that path from production scans; scan an exact copy in a separate non-blocking GitHub Actions workflow; link the hosted Gitleaks and TruffleHog run and artifact directly; record GitHub's accepted push, feature settings, custom-pattern availability, and sanitized alert query separately; evaluate the control system across ten criteria; and assign local hooks to feedback, host protection to the first governed remote boundary, required Gitleaks CI to merge policy, and TruffleHog to named detector or source gaps.",
+      "rationale": "Versioned inputs make future pattern changes comparable and auditable without depending on a local-only run. The corpus is safe to publish because no value was provider-issued and all private keys were generated solely as untrusted fixtures. Separating CLI outcomes, host behavior, and documented capability prevents the non-issued GitHub result from being generalized. Treating the ten rows as decision criteria lets the organization select one or more controls according to inventory and risk appetite, while the gate model distinguishes fast feedback from centrally enforceable prevention, merge governance, and later discovery.",
+      "authoritative_sources": [
+        {
+          "title": "Gitleaks repository and documentation",
+          "url": "https://github.com/gitleaks/gitleaks",
+          "supports": "Git and directory scanning, custom configuration, allowlists, redaction, reports, and exit behavior."
+        },
+        {
+          "title": "TruffleHog repository and custom-detector documentation",
+          "url": "https://github.com/trufflesecurity/trufflehog",
+          "supports": "Git and wider source scanning, provider checks, custom detectors, report behavior, and failure semantics."
+        },
+        {
+          "title": "GitHub supported secret-scanning patterns",
+          "url": "https://docs.github.com/en/code-security/reference/secret-security/supported-secret-scanning-patterns",
+          "supports": "Provider, generic, AI-detected, custom-pattern, validity, and push-protection boundaries."
+        },
+        {
+          "title": "GitHub secret-scanning scope",
+          "url": "https://docs.github.com/en/code-security/reference/secret-security/secret-scanning-scope",
+          "supports": "Paired patterns, token versions, size, finding-count, timeout, and push-protection limits."
+        },
+        {
+          "title": "GitHub custom-pattern management",
+          "url": "https://docs.github.com/en/code-security/how-tos/secure-your-secrets/customize-leak-detection/manage-custom-patterns",
+          "supports": "Dry-run, publication, push protection, and eligibility-dependent custom patterns."
+        }
+      ],
+      "verification_methods": [
+        "Confirm GitHub Actions run 32818011678 completed at corpus commit 00feb11a9db6af732a82ce769dd0334af9a7629e and artifact 9552099737 contains the same manifest digest and safe scenario metadata checked into results/scanner-comparison-results.json.",
+        "Confirm GitHub accepted the corpus commit without a push-protection bypass and the sanitized point-in-time alert query and feature settings match results/github-secret-protection-results.json.",
+        "Run make compare with Gitleaks 8.30.1 and TruffleHog 3.97.1 and confirm all manifest assertions, full Gitleaks redaction, 12 of 15 and eight of 15 positive-scenario outcomes, and three safe negatives per engine.",
+        "Add a safe unmanifested fixture temporarily and confirm the comparison exits before scanning with the manifest-coverage guard, then remove the temporary fault and rerun the full comparison.",
+        "Run the production Gitleaks and TruffleHog commands and confirm the exact corpus exclusions prevent intentional fixtures from weakening scans outside testdata/synthetic/.",
+        "Read the public content in order and confirm it distinguishes criteria from requirements, CLI results from host results, detection from source reach, and local feedback from centrally governed controls.",
+        "Render the Pages site at desktop and mobile widths and confirm page sections use available browser width while tables remain horizontally scrollable."
+      ],
+      "approved_outcome": "Keep direct hosted result links and durable sanitized snapshots; extend the manifest when a secret format or scanner version changes; avoid converting scenario counts into accuracy rates; require only the criteria assigned to a control; use Gitleaks as this repository's portable required merge baseline, GitHub push protection for supported host patterns, and TruffleHog only when a measured detector or wider-source need justifies it.",
+      "invalidation_conditions": [
+        "A corpus value becomes provider-issued, usable, or associated with a trusted account or key relationship.",
+        "A pinned scanner, rule, manifest, host setting, repository plan, or GitHub feature changes the recorded outcome.",
+        "GitHub reports a later alert for the corpus commit or custom-pattern availability changes.",
+        "Production measurements show unacceptable misses, noise, latency, failure behavior, report exposure, or operating cost.",
+        "The repository's threat model, credential inventory, hosting platform, source scope, or bypass authority changes materially."
+      ],
+      "related_decisions": ["CD-0002", "CD-0004", "CD-0006"],
+      "supersedes": ["CD-0001", "CD-0007"],
       "superseded_by": null,
       "originated_on": "2026-08-25",
       "last_reviewed_on": "2026-08-25"

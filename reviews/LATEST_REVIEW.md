@@ -1,24 +1,24 @@
-# Review record: representative credential matrix and gate policy
+# Review record: hosted corpus, scanner selection, and governed gates
 
 ## Status and baseline
 
-- Status: Ready for follow-up check-in; initial hosted GitHub checks passed and the product test remains follow-up
+- Status: Complete with no open required findings
 - Review date: 2026-08-25
 - Reviewer: Codex
 - Model / effort: `gpt-5` / `xhigh`
-- Branch: `main`
-- Commit: `256446593051d22c01ea593919526e621333d1e6`
-- Worktree: Dirty; `README.md` adds the CodeQL badge after its first successful hosted run, `reviews/REVIEW_STATE.json` records the completed passes, and the review router recognizes the current GPT-5 reviewer family
-- Review state ID: `5412fbbe66650342d42f2372b513a8d853e77fb4a1fb32afb43894cc585a2bd4`
-- Scoped content fingerprint: `ab5c0807dc7fd2f0b6929e6d93b2d07f2d299dab1fbf10e051048c2b7396fc02`
-- State capture: `python3 scripts/capture_review_state.py` over the 13 scopes listed below
-- Pass state: Recorded in `reviews/REVIEW_STATE.json` after the root commit supplied a Git `HEAD`.
+- Branch: `remote-corpus-evaluation`
+- Baseline commit: `00feb11a9db6af732a82ce769dd0334af9a7629e`
+- Worktree: Dirty by design; the reviewed change set contains the rewritten public content, remote result snapshots, responsive layout, manifest guard, decision register, and this review state
+- Review state ID: `aa2a869371cc0d0e6ceadbc45c63981a62cb3f2e3eccc211051852bf54da59ff`
+- Scoped content fingerprint: `d92e0b84681a6c536f64d073ce7eb7c7d637bced502cd288489063b463721306`
+- State capture: `python3 scripts/capture_review_state.py` over the 13 scopes below; 53 files
+- Pass routing: `python3 scripts/review_passes.py --model gpt-5 --effort xhigh --json`
+- Pass recording: all 11 routed passes recorded clean in `reviews/REVIEW_STATE.json`
 
-This review supersedes the earlier same-day record because feedback materially
-expanded the corpus, added GitHub's documented behavior and host-test procedure,
-clarified TruffleHog source breadth, added custom-format guidance, and changed
-the central workflow triggers. The check-in refresh also includes the CodeQL
-and dependency-review workflows required by the repository standard.
+The prior review at commit `256446593051d22c01ea593919526e621333d1e6`
+was not carried forward for any content pass. The corpus, result source, argument,
+gate model, page layout, comparison, and durable decisions all changed, so every
+pass reran.
 
 ## Frozen review scope
 
@@ -36,109 +36,119 @@ and dependency-review workflows required by the repository standard.
 12. `results/`
 13. `reviews/CONTENT_DECISIONS.yml`
 
-Remote settings, hosted Actions results, branch rules, Secret Protection
-eligibility, push-protection behavior, and deployed Pages remain outside the
-local workspace.
+The live product services are outside the filesystem scope. Their recorded
+inputs were checked separately: Actions runs `32818011673` and `32818011678`,
+artifact `9552099737`, repository Secret Protection settings, a sanitized alert
+count, custom-pattern endpoint availability, and `main` branch protection.
 
 ## Review passes
 
-| Pass | Verdict | Evidence |
-| --- | --- | --- |
-| Factual correctness | Clean | GitHub patterns, scope limits, custom-pattern behavior, plan caveats, Gitleaks decoding/custom rules, and TruffleHog source/custom-detector behavior were checked against current primary sources. |
-| Adversarial claims | Clean | Scenario fractions are explicitly not accuracy rates; GitHub documented behavior is separated from the pending hosted result; “broad discovery” is defined as source reach and optional provider checks. |
-| Terminology and taxonomy | Clean | Secret classes, alerting, push blocking, local detection, host behavior, preventive gates, merge gates, and detective scans remain distinct. |
-| Cross-format consistency | Clean | README, Markdown article, web page, script, JSON, result README, workflow triggers, and required-status name agree. |
-| Topic completeness | Clean | Tool criteria precede comparison; password, token, service-account, key, internal-format, encoding, custom-pattern, limitation, gate, response, and storage topics are covered. |
-| Argument integrity | Clean | Requirements lead to per-shape results, capability distinctions, limitations, and a risk-based gate choice rather than “run all tools.” |
-| Executable demonstration | Clean | The pinned engines ran against 15 positive and three negative temporary scenarios; exact outcomes are asserted and the regenerated JSON matched. |
-| Static web structure | Clean | HTML anchors/assets and CSS braces passed the repository checker; the page contains the complete matrix and revised decision map. |
-| Decision reconciliation | Clean | CD-0001, CD-0002, CD-0004, and CD-0006 were reaffirmed; CD-0005 was superseded by CD-0007. |
-| Repository and workflow security | Clean | CodeQL and dependency-review use current immutable action commits on Node 24; all workflows declare least-privilege permissions and no workflow uses `pull_request_target`. |
+| Pass | Router decision | Verdict | Review basis |
+| --- | --- | --- | --- |
+| Factual correctness | Run: inputs changed | Clean | Compared claims with current primary product references, pinned command behavior, remote metadata, and repository settings. |
+| Source authority | Run: citation inputs changed | Clean | Security and product claims use vendor, government, OWASP, or Kubernetes primary sources; dated product boundaries remain explicit. |
+| Adversarial claims | Run: prose changed | Clean | Counts are not accuracy rates; GitHub's non-issued result is not generalized; enforcement and bypass limitations are stated. |
+| Terminology and taxonomy | Run: prose changed | Clean | Secrets, sensitive non-secrets, detection, blocking, alerting, provider checks, merge gates, and discovery remain distinct. |
+| Cross-format consistency | Run: prose/code/metadata/style changed | Clean | README, Markdown, HTML, CSS, manifest, script, JSON, workflow labels, and live settings agree. |
+| Visual content | Run: CSS and page changed | Clean | Full-width desktop/tablet/mobile layouts were rendered in dark mode; desktop and mobile were also rendered with the light token set. Tables scroll inside their container without page overflow. |
+| Cross-page consistency | Run: prose/metadata changed | Clean | The concise README points to the detailed Pages guide; both give the same roles, counts, host result, limitations, and direct links. |
+| Topic completeness | Run: prose changed | Clean | Definition, business risk, incidents, response, storage, evaluation, custom formats, comparison, limitations, gates, governance, and operations are covered. |
+| Argument integrity | Run: prose changed | Clean | Criteria precede comparison; direct results and limitations lead to a conditional control assignment instead of a product-count recommendation. |
+| Executable demonstration | Run: code/prose changed | Clean | Both pinned engines reran all 18 manifest scenarios; redaction and result assertions passed; the unmanifested-fixture fault was injected and rejected. |
+| Decision reconciliation | Run: register changed | Clean | CD-0008 supersedes the temporary-only corpus decision and the pending-host-test decision; CD-0002, CD-0004, and CD-0006 remain applicable. |
 
-## Decision ledger
-
-| Question | Reviewed conclusion | Supporting artifact |
-| --- | --- | --- |
-| Is every tool required at every gate? | No. Gitleaks is the scoped portable baseline, GitHub push protection is the hosted-boundary control when eligible, and TruffleHog is added for a named detector/source/provider-check gap. | README, article, web recommendation, CD-0007 |
-| Why is TruffleHog “broad”? | Its supported sources and optional provider checks extend beyond a checkout. The term does not assert superior detection for every file shape. | Capability comparison and primary TruffleHog documentation |
-| Is GitHub part of the effectiveness matrix? | Yes, as documented pattern and limitation behavior plus a separate remote-test column. No local GitHub result is invented. | Web/article matrix and hosted-test procedure |
-| How are internal formats covered? | All three tools' custom-pattern facilities are described, and the fictional internal format is tested in plaintext and encoded form for the local engines. | `.gitleaks.toml`, `.trufflehog.yml`, harness, custom-format section |
-| Where is policy enforced? | Local hooks provide feedback. Central Gitleaks runs on push, pull request, merge push, daily, and manual dispatch; the PR status is the required candidate. | `.github/workflows/gitleaks.yml` and gate table |
-| What is the comparison workflow for? | Regression and product evaluation only; its job remains `Comparison only — not a merge gate`. | `.github/workflows/scanner-comparison.yml` |
-
-## Executable result
-
-Measured locally on 2026-08-25:
-
-- 15 credential-shaped positive scenarios and three safe negatives;
-- Gitleaks 8.30.1 detected 12 positives and passed all three negatives;
-- TruffleHog 3.97.1 detected eight positives and passed all three negatives;
-- both missed the HTTP Basic scenario;
-- Gitleaks missed the PostgreSQL URL and GitHub PAT-shaped scenarios;
-- TruffleHog missed the password assignment, JWT, OAuth client secret, split
-  AWS pair, symmetric key, and webhook scenarios; and
-- the complete per-scenario detectors, counts, and exit codes are stored in
-  `results/scanner-comparison-results.json`.
-
-Safety properties checked:
-
-- all credential-shaped inputs were assembled only under `mktemp` and deleted
-  on exit;
-- no input was provider-issued and outbound provider checks remained disabled;
-- Gitleaks reports were redacted and checked for every materialized fixture;
-- TruffleHog raw JSON remained temporary; and
-- the persisted result contains metadata only.
-
-## Mechanical checks
+Always-run tier:
 
 | Check | Result | Boundary |
 | --- | --- | --- |
-| `bash -n scripts/*.sh` | Pass | Shell parsing only |
-| `shellcheck scripts/*.sh` | Pass | Static shell analysis |
-| `actionlint` | Pass | Workflow structure, not hosted execution |
-| `pre-commit validate-config .pre-commit-config.yaml` | Pass | Configuration schema, not installation in another clone |
-| `python3 scripts/check-site.py` | Pass: 14 IDs, 43 links, local assets present | Static page structure, not external-link or browser testing |
-| `python3 scripts/verify_content_decisions.py` | Pass: seven decisions | Registry integrity, not independent correctness |
-| Ruby YAML parse | Pass for every workflow and pre-commit config | Syntax only |
-| JSON parse | Pass for both result files and decision registry | Syntax only |
-| `make check` | Pass; expected positive blocked, negative passed, working tree clean | Gitleaks baseline only |
-| Regenerated comparison diff | Exact match | Pinned versions and current platform only |
-| Temporary root-commit Gitleaks scan | Clean | Local simulation, not GitHub Actions |
-| Temporary root-commit TruffleHog scan | Zero findings | Local simulation with provider checks disabled |
-| Repository Gitleaks scan | Zero findings | Configured local detector coverage only |
-| Repository TruffleHog scan | Zero findings | Filesystem scan with provider checks disabled |
-| GitHub Action reference check | All workflow actions use immutable commit SHAs | Pinning does not establish action correctness |
-| Action runtime inspection | Checkout v7, CodeQL v4, and dependency-review v5 report Node 24 | Current upstream manifests on 2026-08-25 |
-| `pre-commit run --all-files` | Pass: staged Gitleaks, private-key, file-size, merge-conflict, EOF, and whitespace hooks | Local staged state |
-| Social-preview inspection | Pass: 1200×630 JPEG is legible and 108,034 bytes | Visual and size review of the committed asset |
-| Hosted CI | Pass: `Shell checks` and `Static site checks` | GitHub Actions run `32815702105` on the root commit |
-| Hosted secret scan | Pass: `Gitleaks full-history gate` | GitHub Actions run `32815702102` on the root commit |
-| Hosted CodeQL | Pass: `Analyze (python)` | GitHub Actions run `32815702047` on the root commit |
-| Hosted scanner comparison | Pass: `Comparison only — not a merge gate` | GitHub Actions run `32815701980` on the root commit |
-| Pages publication | Pass: deployment completed and the public URL returned HTTP 200 | GitHub Actions run `32815702018`; HTTP reachability is not a complete browser review |
+| Mechanical validation | Pass | Syntax, static structure, configuration parsing, JSON shape, and repository scan behavior; not production accuracy. |
+| Guard regression | Pass | Baseline positive/negative Gitleaks test, full redaction, manifest outcome assertions, corpus exclusions, and site guards all still fire. |
+| Residual exhaustion | Pass | The manifest coverage finding was fixed, its affected script and public descriptions were reread, and the full comparison reran. |
 
-The first staged hook run exposed two check-in defects and remediated both: the
-Gitleaks hook now disables filename passing so its staged Git command receives
-no spurious path arguments, and the social preview is a 108 KB JPEG rather than
-a 1.15 MB PNG. The unchanged 500 KB guard now catches future oversized assets.
+## Finding mechanized into a guard
 
-## Limitations and remote follow-up
+| Finding | Guard | Original fault check |
+| --- | --- | --- |
+| A new file under the production-allowlisted corpus could be omitted from the manifest and therefore escape per-scenario assertions. | `scripts/compare-secret-scanners.sh` now requires unique IDs and targets, confines targets to positive/negative paths, expands directory targets, and compares every tracked or untracked non-ignored corpus file with the covered target set. | A temporary safe `negative/unmanifested.txt` caused exit 1 with the expected manifest-coverage message; after removal the 18-scenario comparison passed. |
 
-- GitHub Secret Protection must be run in an eligible disposable repository
-  using `results/github-secret-protection-test-procedure.md`.
-- The local scenario fractions are regression counts, not estimates of
-  production accuracy or false-positive rates.
-- Large-history timing, collaboration/object sources, archives, images,
-  provider-check latency, and production triage cost were not measured.
-- Browser rendering was not re-run for the badge-only revision; the badge does
-  not alter the Pages artifact, whose initial deployment completed and returned
-  HTTP 200.
-- Required-status policy is applied after the follow-up commit so its contexts
-  reference job names that have appeared in hosted runs.
+## Material-claim ledger
+
+| Claim | Classification | Source or run | Result |
+| --- | --- | --- | --- |
+| A secret is a confidential authenticator, authorizer, decryptor, signer, or impersonation value. | Definition | OWASP secret lifecycle guidance and practical examples | Supported at the stated engineering scope. |
+| Repository credentials can enable a second-stage business incident even when source is private. | Historical mechanism | DOJ Uber agreement, FTC complaint, GitHub OAuth campaign report, CircleCI incident report | Mechanisms and impacts are attributed; scanning-alone prevention is not claimed. |
+| Revocation or rotation precedes Git history cleanup. | Incident response | GitHub sensitive-data removal guidance | Correct and repeated consistently. |
+| Local hooks can be early but are not centrally governed by default. | Control design | Hook implementation plus clone-local bypass model | Correct; public guidance assigns hooks to feedback. |
+| Required CI governs merge, not first remote exposure. | Control design | Git and GitHub workflow sequence | Correct; remote exposure is shown before CI. |
+| Gitleaks reported 12/15 and TruffleHog 8/15 on the committed corpus. | Test result | Run `32818011678`, artifact `9552099737`, digest-matched JSON | Exact match; both passed three negatives. |
+| GitHub accepted the corpus push and returned no alert at the recorded query time. | Host observation | Commit `00feb11`, push output, sanitized API query at `2026-08-25T07:05:53Z` | Correct for this non-issued corpus and enabled configuration; limitations are adjacent. |
+| Repository custom patterns were unavailable. | Feature availability | Repository custom-pattern endpoint HTTP 404 | Correct for this public personal repository; eligible-plan behavior is separately documented. |
+| TruffleHog is broad in source reach and optional provider checks, not necessarily in file-shape detection. | Product comparison | TruffleHog primary documentation and corpus counterexamples | Correctly bounded. |
+| No product must satisfy all ten evaluation rows alone. | Selection model | Control-system decomposition | Supported; mandatory versus conditional rows are explicit. |
+| `Gitleaks full-history gate` is required on `main`, but administrators are not enforced. | Repository governance | Live branch-protection response | Correct and disclosed in README, article, and Pages result card. |
+
+## Argument integrity
+
+**Thesis as stated:** Secret scanning should be designed as a governable control
+system in which detection capability, timing, enforcement, reliable operation,
+bypass governance, and incident response determine practical effectiveness.
+
+**Thesis as supported:** The primary sources, hosted scanner run, GitHub host
+observation, and repository controls support a conditional layered design using
+local feedback, host prevention for supported patterns, required portable merge
+policy, and scoped discovery for residual gaps.
+
+Gap: none. The title, H1, lede, meta description, and README opening remain
+defensible when read independently; none claims complete detection or universal
+product superiority.
+
+Dismissed candidates:
+
+- GitHub's accepted corpus was not treated as general provider-token weakness because every value is non-issued and the alert query is point-in-time.
+- Aggregate scanner counts were not treated as production accuracy or a winner because the scenarios were chosen for variety, not statistical prevalence.
+- Earlier placement was not equated with stronger governance; local bypass and installation remain explicit.
+- TruffleHog's wider sources were not used to infer better detection on every file shape.
+- The required Gitleaks status was not called bypass-proof because administrator enforcement is disabled.
+- The checked-in untrusted private keys were retained because they have no account, certificate, workload, trust, or authorized-key relationship; exact corpus exclusions and the manifest guard limit the exception.
+
+## Cross-format and visual ledger
+
+| Concept | Representations checked | Result |
+| --- | --- | --- |
+| Corpus size and outcomes | Manifest, script, remote JSON, README, Markdown, HTML | 15 positives, three negatives, 12 Gitleaks detections, eight TruffleHog detections, three negatives passed by both. |
+| GitHub host result | Push, API/settings output, host JSON, README, Markdown, HTML | Accepted without bypass; zero alerts at query time; custom patterns unavailable; no provider-wide inference. |
+| Tool-to-gate assignment | Workflows, branch protection, README, Markdown, HTML | Local feedback, host prevention, required Gitleaks merge status, non-blocking remote comparison, scheduled TruffleHog discovery. |
+| Responsive page | CSS, dark desktop/tablet/mobile renders, light desktop/mobile renders | Main and hero consume the viewport; three-result cards adapt; page has no horizontal overflow; wide tables scroll locally. |
+| Gate-flow visual | HTML labels, article Mermaid, gate table, recommendation | Sequence, authority, exposure point, block paths, and late response agree. |
+| Social preview | Existing 1200×630 JPEG and current metadata | Asset unchanged; title/description metadata remains consistent with the reframed article. |
+
+## Mechanical and hosted checks
+
+| Check | Result | Boundary |
+| --- | --- | --- |
+| `bash -n scripts/*.sh`; `shellcheck scripts/*.sh` | Pass | Parsing and static shell analysis. |
+| `actionlint`; Ruby YAML parse | Pass | Workflow/configuration structure, not hosted permissions behavior. |
+| Python compile; JSON parse | Pass | Syntax and JSON validity. |
+| `python3 scripts/check-site.py` | Pass: 14 IDs, 53 links, local references present | Static anchors/assets/CSS, not external-site uptime. |
+| `python3 scripts/verify_content_decisions.py` | Pass: eight decisions | Register structure and references, not technical truth. |
+| `make check`; Gitleaks directory and full-history scans | Pass | Configured Gitleaks coverage with the intentional corpus exclusion. |
+| `make compare` with Gitleaks 8.30.1 and TruffleHog 3.97.1 | Pass: all 18 manifest assertions | Current corpus and configurations, not production accuracy. |
+| TruffleHog full-history production command | Pass: zero findings | Provider checks disabled and exact corpus path excluded. |
+| Remote artifact comparison | Byte-identical SHA-256 `4c8e3cd…` | Durable JSON exactly matches artifact `9552099737`. |
+| Host state query | Zero alerts; Secret Protection and push protection enabled; custom patterns unavailable | Point-in-time and non-issued-corpus limitations remain. |
+| Browser layout | Dark 1600/1024/390 and light 1600/390 | Visual and computed-width review of the local Pages source. |
+
+## Limitations and uncertainty
+
+- The corpus is a regression matrix, not a production sample; false-positive and false-negative rates were not estimated.
+- No provider-issued or active credential was used, and outbound provider checks remained disabled.
+- GitHub alerting is asynchronous; the stored alert count is tied to its recorded query time.
+- Large histories, archives, images, organization sources, provider latency, cost, and production triage were not benchmarked.
+- The hosted results predate the final prose and manifest-coverage guard, but use the same committed corpus, manifest digest, rules, and pinned scanner versions. The final PR reruns all workflows.
+- Main-branch administrator enforcement is disabled; the article discloses this rather than representing the required status as absolute.
 
 ## Closure
 
-The repository now supports a conditional selection: start from the secret
-inventory and gate requirements, use individual scenario results rather than a
-universal score, add host-native or second-engine coverage only for material
-residual gaps, and keep central enforcement even when local hooks are absent.
+All routed passes ran and were recorded clean after remediation. All deterministic
+checks and prior guards passed. The only review finding was mechanized and its
+original fault was exercised. No required finding remains open.
