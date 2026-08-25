@@ -540,6 +540,80 @@
       "superseded_by": null,
       "originated_on": "2026-08-25",
       "last_reviewed_on": "2026-08-25"
+    },
+    {
+      "id": "CD-0010",
+      "title": "Classify controls by target event and publish safe workflow summaries",
+      "status": "accepted",
+      "implementation_state": "implemented",
+      "scope": {
+        "files": [
+          "README.md",
+          "secret-scanning.md",
+          "docs/index.html",
+          "docs/styles.css",
+          ".github/workflows/ci.yml",
+          ".github/workflows/gitleaks.yml",
+          ".github/workflows/scanner-comparison.yml",
+          ".github/workflows/trufflehog-discovery.yml",
+          "scripts/check-site.py",
+          "scripts/check-workflow-summaries.py"
+        ],
+        "concepts": [
+          "preventive versus detective controls",
+          "GitHub receive boundary",
+          "host-managed provider patterns",
+          "repository-configured custom detectors",
+          "safe GitHub Actions job summaries",
+          "low-effort rollout order",
+          "non-duplicative comparison structure"
+        ]
+      },
+      "originating_feedback": "The article needed explicit preventive and detective classifications, a clearer view of where GitHub's gate and configuration reside, direct references for eligible Team and Enterprise extensions, unambiguous custom-rule labels, useful Gitleaks and TruffleHog Action summaries, removal or merger of the duplicate make-compare presentation, and a rollout ordered by low-hanging controls.",
+      "decision": "Classify every control relative to its target event; identify GitHub push protection as preventive at the GitHub receive boundary; identify required CI as detective for first remote exposure and preventive for merge; identify schedules as detective; label detector source as built in, repository configured, or host managed; publish only counts, detector names, scope, versions, control role, and output-handling metadata in production job summaries; replace the repeated feature score and abbreviated terminal with a configuration-ownership matrix and direct hosted-result cards; and order rollout from GitHub host protection through local feedback, required CI, scheduled discovery, and incident response.",
+      "rationale": "A control cannot be called preventive or detective without naming the event. Separating target events resolves the apparent contradiction around CI. Configuration ownership explains why a repository custom regex is not default coverage and why GitHub's public personal-repository behavior cannot represent eligible organization configurations. Safe summaries make each Action result reviewable without persisting match material. Removing duplicated matrices leaves one evaluation rubric, one scenario comparison, and one operational selection decision.",
+      "authoritative_sources": [
+        {
+          "title": "GitHub push protection",
+          "url": "https://docs.github.com/en/code-security/concepts/secret-security/push-protection",
+          "supports": "The host boundary, blocked-push behavior, repository and user protection types, bypass alerts, and configurable governance surfaces."
+        },
+        {
+          "title": "GitHub security features",
+          "url": "https://docs.github.com/en/code-security/getting-started/github-security-features",
+          "supports": "Public-repository features available without purchase and additional Secret Protection capabilities for eligible GitHub Team and Enterprise Cloud accounts."
+        },
+        {
+          "title": "GitHub custom patterns",
+          "url": "https://docs.github.com/en/code-security/how-tos/secure-your-secrets/customize-leak-detection/define-custom-patterns",
+          "supports": "Organization-plan eligibility, configuration levels, dry runs, publication, and optional push protection for custom patterns."
+        },
+        {
+          "title": "GitHub global secret-scanning settings",
+          "url": "https://docs.github.com/en/code-security/how-tos/secure-at-scale/configure-organization-security/establish-complete-coverage/configure-global-settings",
+          "supports": "Organization- and enterprise-level pattern selection and its current public-preview status."
+        }
+      ],
+      "verification_methods": [
+        "Run actionlint, shellcheck, python3 scripts/check-workflow-summaries.py, and python3 scripts/check-site.py.",
+        "Run the Gitleaks and TruffleHog production workflow commands and confirm summaries are written for clean, finding, and scanner-error outcomes without uploading reports.",
+        "Inspect hosted Actions summaries and confirm they name outcome, version, scope, trigger, commit, control role, provider-check setting where applicable, and safe report handling.",
+        "Render the Pages site at desktop and mobile widths and confirm the control map shows all four boundaries, classifications, owners, and constraints without clipping.",
+        "Read the evaluation rubric, scenario matrix, configuration-ownership matrix, recommendation, results, and operations sections in order and confirm each serves a distinct decision."
+      ],
+      "approved_outcome": "Keep the responsive control map and configuration-ownership matrix; keep the full scenario table as the only result comparison; publish safe production scan summaries; start rollout with GitHub push protection, then local feedback, required CI, scheduled discovery, and incident response; and add a second blocking engine only for a measured residual gap.",
+      "invalidation_conditions": [
+        "GitHub changes the boundary, enablement, plan, pattern, timeout, bypass, custom-pattern, or organization-governance behavior of push protection.",
+        "The repository's hosting platform, protected event, branch policy, bypass authority, or secret inventory changes.",
+        "A hosted workflow summary exposes match material, omits failure information, or fails to render under a finding or scanner error.",
+        "A second blocking engine produces sufficient measured incremental benefit to justify a different tool-to-gate assignment.",
+        "The comparison or rollout structure becomes inconsistent with the executable workflows or hosted results."
+      ],
+      "related_decisions": ["CD-0004", "CD-0006", "CD-0009"],
+      "supersedes": [],
+      "superseded_by": null,
+      "originated_on": "2026-08-25",
+      "last_reviewed_on": "2026-08-25"
     }
   ]
 }

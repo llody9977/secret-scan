@@ -1,12 +1,12 @@
 {
   "schema_version": 3,
-  "measured_at_utc": "2026-08-25T07:47:28Z",
+  "measured_at_utc": "2026-08-25T09:19:05Z",
   "execution": {
     "environment": "github-actions",
     "repository": "llody9977/secret-scan",
-    "commit": "bcc467fc7e4d9a4db539acd6dd00e34a5f4dc1a7",
-    "run_id": "32823251440",
-    "run_url": "https://github.com/llody9977/secret-scan/actions/runs/32823251440",
+    "commit": "8a64be07e1848dea00579f8a7c2b24d67a17fe61",
+    "run_id": "32831205587",
+    "run_url": "https://github.com/llody9977/secret-scan/actions/runs/32831205587",
     "runner_os": "Linux",
     "runner_arch": "X64"
   },

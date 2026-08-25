@@ -55,7 +55,8 @@ def local_path(reference: str) -> Path | None:
 def main() -> int:
     errors: list[str] = []
     parser = SiteParser()
-    parser.feed(INDEX.read_text(encoding="utf-8"))
+    html = INDEX.read_text(encoding="utf-8")
+    parser.feed(html)
 
     duplicate_ids = sorted({value for value in parser.ids if parser.ids.count(value) > 1})
     if duplicate_ids:
@@ -92,6 +93,20 @@ def main() -> int:
     css = (DOCS / "styles.css").read_text(encoding="utf-8")
     if css.count("{") != css.count("}"):
         errors.append("styles.css has unbalanced braces")
+
+    required_content = (
+        'class="control-map"',
+        "GitHub receive boundary",
+        "Preventive at GitHub's receive boundary",
+        "Detective for first remote exposure",
+        "repository configured",
+        "Start with the lowest-effort governed boundary",
+    )
+    for phrase in required_content:
+        if phrase not in html:
+            errors.append(f"missing control-model content: {phrase}")
+    if 'class="results-panel"' in html or "make compare" in html:
+        errors.append("abbreviated make-compare panel duplicates the full scenario matrix")
 
     if errors:
         print("Static-site validation failed:", file=sys.stderr)

@@ -6,9 +6,9 @@ provenance, never a matched value.
 ## Gitleaks and TruffleHog
 
 [`scanner-comparison-results.json`](scanner-comparison-results.json) was produced
-by [GitHub Actions run `32823251440`](https://github.com/llody9977/secret-scan/actions/runs/32823251440)
-from commit `bcc467fc7e4d9a4db539acd6dd00e34a5f4dc1a7`. The original
-[artifact `9553923464`](https://github.com/llody9977/secret-scan/actions/runs/32823251440/artifacts/9553923464)
+by [GitHub Actions run `32831205587`](https://github.com/llody9977/secret-scan/actions/runs/32831205587)
+from commit `8a64be07e1848dea00579f8a7c2b24d67a17fe61`. The original
+[artifact `9556823734`](https://github.com/llody9977/secret-scan/actions/runs/32831205587/artifacts/9556823734)
 expires after the repository's artifact-retention period; the checked-in JSON
 retains the result, runner, commit, manifest digest, versions, exit codes, and
 detector names.
@@ -18,9 +18,13 @@ negatives. Gitleaks reported 13 positive scenarios and TruffleHog reported eight
 both passed all three negatives. Those counts are regression outcomes for the
 selected scenarios and configurations, not production accuracy estimates.
 
-The production [Gitleaks history gate run](https://github.com/llody9977/secret-scan/actions/runs/32823251410)
-also passed. Its repository configuration excludes only `testdata/synthetic/`,
-while the evaluation job explicitly copies and scans that corpus.
+The production [Gitleaks history job](https://github.com/llody9977/secret-scan/actions/runs/32831205515/job/97750057067)
+and [TruffleHog discovery job](https://github.com/llody9977/secret-scan/actions/runs/32831215517/job/97750093790)
+also passed on commit `8a64be0`. Their hosted summaries report outcome, version,
+history scope, control role, exclusions, provider-check state where applicable,
+and safe report handling. The production configurations exclude only
+`testdata/synthetic/`, while the evaluation job explicitly copies and scans
+that corpus.
 
 ## GitHub Secret Protection
 
@@ -44,7 +48,8 @@ target repository and plan.
 - [`../testdata/synthetic/manifest.json`](../testdata/synthetic/manifest.json) is
   the source of truth for scenario targets and expected CLI outcomes.
 - Provider checks were disabled.
-- Gitleaks reports used full redaction and passed a redaction assertion.
+- Gitleaks `Secret` fields were exactly redacted; contextual `Match` fields were
+  checked for the redaction marker and were not persisted in safe metadata.
 - Raw TruffleHog JSON was deleted with the ephemeral work directory.
 - The host export omits GitHub's `secret` field and retains only safe settings,
   counts, feature availability, and alert/location metadata.

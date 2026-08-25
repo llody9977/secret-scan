@@ -12,10 +12,11 @@ A scanner is only one part of a secret-scanning control. Effective protection al
 
 ## Practical recommendation
 
-- Use pre-commit and pre-push hooks for fast developer feedback; they are per-clone and bypassable, so they are not organization-wide enforcement.
-- Enable host push protection for the supported patterns that must not reach the remote. Test the actual plan, pattern versions, service limits, and bypass policy.
-- Require a portable CI scanner for merge policy and internal formats. In this repository that role belongs to **Gitleaks full-history gate**.
-- Add TruffleHog as scheduled or wider-source discovery when its distinct detectors, source connectors, or approved provider checks close a named risk gap.
+- Enable GitHub secret scanning and push protection first. It is preventive at GitHub's receive boundary for covered patterns; the provider detector expressions are host managed in this public personal repository.
+- Add pre-commit and pre-push hooks for fast developer feedback; they are per-clone and bypassable, so they are not organization-wide enforcement.
+- Require a portable CI scanner for merge policy and internal formats. In this repository, **Gitleaks full-history gate** is detective for first remote exposure and preventive for merge when branch policy requires it.
+- Run scheduled scans for hygiene and residual gaps. Add TruffleHog when its distinct detectors, source connectors, or approved provider checks close a named business need.
+- Route confirmed findings into incident response: revoke or rotate first, investigate use, replace storage, remove residue, and add a safe regression case.
 
 This is not a recommendation to run every engine at every gate.
 
@@ -29,11 +30,11 @@ The repository commits 16 fictional credential-shaped positives and three safe n
 | TruffleHog 3.97.1 | 8/16 positive scenarios reported; 3/3 negatives passed | Non-blocking regression and scheduled discovery |
 | GitHub hosted secret scanning | Blocked the added Mailchimp-shaped fixture at push; a `used_in_tests` bypass created [alert #1](https://github.com/llody9977/secret-scan/security/secret-scanning/1). The earlier 15 positive fixtures produced no host alert | First governed remote boundary for covered provider patterns; use eligible generic/custom patterns or portable CI for assigned residual formats |
 
-These are per-scenario regression outcomes, not production accuracy rates. See the [GitHub Actions run](https://github.com/llody9977/secret-scan/actions/runs/32823251440), [machine-readable artifact](https://github.com/llody9977/secret-scan/actions/runs/32823251440/artifacts/9553923464), [durable result snapshot](results/scanner-comparison-results.json), [sanitized GitHub host result](results/github-secret-protection-results.json), and [direct GitHub alert](https://github.com/llody9977/secret-scan/security/secret-scanning/1).
+These are per-scenario regression outcomes, not production accuracy rates. See the current [Gitleaks job summary](https://github.com/llody9977/secret-scan/actions/runs/32831205515/job/97750057067), [TruffleHog job summary](https://github.com/llody9977/secret-scan/actions/runs/32831215517/job/97750093790), [corpus run](https://github.com/llody9977/secret-scan/actions/runs/32831205587), [machine-readable artifact](https://github.com/llody9977/secret-scan/actions/runs/32831205587/artifacts/9556823734), [durable result snapshot](results/scanner-comparison-results.json), [sanitized GitHub host result](results/github-secret-protection-results.json), and [direct GitHub alert](https://github.com/llody9977/secret-scan/security/secret-scanning/1).
 
 The GitHub host test is the free public-repository configuration of a personal repository. Provider scanning and push protection are enabled. Non-provider generic patterns, validity checks, and custom patterns are unavailable or disabled here; eligible organization plans can add capabilities, but those configurations must be tested separately.
 
-The production scans exclude only the intentional corpus path. The separate remote evaluation workflow copies and scans that directory explicitly, rejects unmanifested fixtures, asserts every scenario outcome, publishes a job summary, and uploads safe metadata. Raw TruffleHog matches remain ephemeral; Gitleaks reports must pass a full-redaction check.
+The production scans exclude only the intentional corpus path. The separate remote evaluation workflow copies and scans that directory explicitly, rejects unmanifested fixtures, asserts every scenario outcome, publishes a job summary, and uploads safe metadata. Raw TruffleHog matches remain ephemeral; Gitleaks secret fields must be exactly redacted, and contextual match text is not published in production summaries.
 
 ## Re-run or extend the evaluation
 

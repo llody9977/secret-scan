@@ -64,6 +64,7 @@ jobs:
           # The JSON contains detector metadata only; raw TruffleHog matches
           # never leave the script's ephemeral working directory.
           jq . "$result"
+          # shellcheck disable=SC2016
           {
             printf '## Checked-in synthetic corpus\n\n'
             printf -- '- Commit: [%s](%s/%s/commit/%s)\n' \
@@ -76,10 +77,16 @@ jobs:
             jq -r '.corpus.scenarios[] | [
               .credential_class,
               .expected_control_decision,
-              (if .gitleaks.detected then "Detected: `\(.gitleaks.detector)`" else "No finding" end),
-              (if .trufflehog.detected then "Detected: `\(.trufflehog.detector)`" else "No finding" end)
+              (if .gitleaks.detected then
+                "Detected: `\(.gitleaks.detector)`" +
+                (if (.gitleaks.detector | contains("synthetic-demo-api-key")) then " *(includes repository rule)*" else " *(built in)*" end)
+               else "No finding" end),
+              (if .trufflehog.detected then
+                "Detected: `\(.trufflehog.detector)`" +
+                (if .trufflehog.detector == "CustomRegex" then " *(repository custom detector)*" else " *(built in)*" end)
+               else "No finding" end)
             ] | "| \(.[0]) | \(.[1]) | \(.[2]) | \(.[3]) |"' "$result"
-            printf '\nThese are regression outcomes for the committed manifest and pinned configurations, not production accuracy rates.\n'
+            printf '\n“Built in” means shipped by the pinned engine. “Repository rule” means the detector came from `.gitleaks.toml` or `.trufflehog.yml`; it is not out-of-box coverage. These are regression outcomes for the committed manifest and pinned configurations, not production accuracy rates.\n'
           } >>"$GITHUB_STEP_SUMMARY"
 
       - name: Upload machine-readable hosted result
