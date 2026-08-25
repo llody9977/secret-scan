@@ -1,0 +1,6 @@
+detectors:
+  - name: SyntheticDemoAPIKey
+    keywords:
+      - DEMO_
+    regex:
+      token: '(DEMO_[A-Z0-9]{32})'

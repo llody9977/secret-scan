@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "measured_on": "2026-08-25",
+  "command": "./scripts/test-secret-scan.sh --json",
+  "scanner": "gitleaks",
+  "scanner_version": "8.30.1",
+  "provider_checks_enabled": false,
+  "secret_material_committed": false,
+  "scenarios": [
+    {"id": "hardcoded-synthetic", "expected": "blocked", "observed_exit_code": 1, "finding_count": 1},
+    {"id": "runtime-reference", "expected": "passed", "observed_exit_code": 0, "finding_count": 0}
+  ]
+}

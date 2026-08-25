@@ -1,0 +1,13 @@
+title = "Secret Scan repository configuration"
+
+# Keep Gitleaks' provider-specific defaults and add one repository-only rule
+# for the fictional credential format used by the controlled demonstration.
+[extend]
+useDefault = true
+
+[[rules]]
+id = "synthetic-demo-api-key"
+description = "Fictional API key used only by the local secret-scan test"
+regex = '''\bDEMO_[A-Z0-9]{32}\b'''
+keywords = ["DEMO_"]
+tags = ["synthetic", "test"]

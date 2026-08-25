@@ -1,0 +1,341 @@
+{
+  "schema_version": 2,
+  "measured_on": "2026-08-25",
+  "command": "./scripts/compare-secret-scanners.sh --json",
+  "corpus": {
+    "secret_material_committed": false,
+    "provider_checks_enabled": false,
+    "positive_scenarios": 15,
+    "safe_negative_scenarios": 3,
+    "scenarios": [
+      {
+        "id": "custom-internal",
+        "credential_class": "Custom internal token",
+        "expected_control_decision": "block",
+        "gitleaks": {
+          "detected": true,
+          "exit_code": 1,
+          "findings": 1,
+          "detector": "synthetic-demo-api-key"
+        },
+        "trufflehog": {
+          "detected": true,
+          "exit_code": 183,
+          "findings": 1,
+          "detector": "CustomRegex"
+        }
+      },
+      {
+        "id": "password-assignment",
+        "credential_class": "Username/password assignment",
+        "expected_control_decision": "block",
+        "gitleaks": {
+          "detected": true,
+          "exit_code": 1,
+          "findings": 1,
+          "detector": "generic-api-key"
+        },
+        "trufflehog": {
+          "detected": false,
+          "exit_code": 0,
+          "findings": 0,
+          "detector": null
+        }
+      },
+      {
+        "id": "postgres-url",
+        "credential_class": "PostgreSQL credential URL",
+        "expected_control_decision": "block",
+        "gitleaks": {
+          "detected": false,
+          "exit_code": 0,
+          "findings": 0,
+          "detector": null
+        },
+        "trufflehog": {
+          "detected": true,
+          "exit_code": 183,
+          "findings": 1,
+          "detector": "Postgres"
+        }
+      },
+      {
+        "id": "basic-header",
+        "credential_class": "HTTP Basic credential",
+        "expected_control_decision": "block",
+        "gitleaks": {
+          "detected": false,
+          "exit_code": 0,
+          "findings": 0,
+          "detector": null
+        },
+        "trufflehog": {
+          "detected": false,
+          "exit_code": 0,
+          "findings": 0,
+          "detector": null
+        }
+      },
+      {
+        "id": "bearer-jwt",
+        "credential_class": "Bearer JWT",
+        "expected_control_decision": "block",
+        "gitleaks": {
+          "detected": true,
+          "exit_code": 1,
+          "findings": 1,
+          "detector": "jwt"
+        },
+        "trufflehog": {
+          "detected": false,
+          "exit_code": 0,
+          "findings": 0,
+          "detector": null
+        }
+      },
+      {
+        "id": "github-pat",
+        "credential_class": "GitHub PAT-shaped token",
+        "expected_control_decision": "block",
+        "gitleaks": {
+          "detected": false,
+          "exit_code": 0,
+          "findings": 0,
+          "detector": null
+        },
+        "trufflehog": {
+          "detected": true,
+          "exit_code": 183,
+          "findings": 1,
+          "detector": "Github"
+        }
+      },
+      {
+        "id": "oauth-client-secret",
+        "credential_class": "OAuth client secret",
+        "expected_control_decision": "block",
+        "gitleaks": {
+          "detected": true,
+          "exit_code": 1,
+          "findings": 1,
+          "detector": "generic-api-key"
+        },
+        "trufflehog": {
+          "detected": false,
+          "exit_code": 0,
+          "findings": 0,
+          "detector": null
+        }
+      },
+      {
+        "id": "aws-pair",
+        "credential_class": "AWS key pair, same file",
+        "expected_control_decision": "block",
+        "gitleaks": {
+          "detected": true,
+          "exit_code": 1,
+          "findings": 1,
+          "detector": "generic-api-key"
+        },
+        "trufflehog": {
+          "detected": true,
+          "exit_code": 183,
+          "findings": 1,
+          "detector": "AWS"
+        }
+      },
+      {
+        "id": "aws-split",
+        "credential_class": "AWS key pair, split files",
+        "expected_control_decision": "block",
+        "gitleaks": {
+          "detected": true,
+          "exit_code": 1,
+          "findings": 1,
+          "detector": "generic-api-key"
+        },
+        "trufflehog": {
+          "detected": false,
+          "exit_code": 0,
+          "findings": 0,
+          "detector": null
+        }
+      },
+      {
+        "id": "service-account",
+        "credential_class": "Service-account private key",
+        "expected_control_decision": "block",
+        "gitleaks": {
+          "detected": true,
+          "exit_code": 1,
+          "findings": 1,
+          "detector": "private-key"
+        },
+        "trufflehog": {
+          "detected": true,
+          "exit_code": 183,
+          "findings": 1,
+          "detector": "PrivateKey"
+        }
+      },
+      {
+        "id": "rsa-private-key",
+        "credential_class": "RSA private key",
+        "expected_control_decision": "block",
+        "gitleaks": {
+          "detected": true,
+          "exit_code": 1,
+          "findings": 1,
+          "detector": "private-key"
+        },
+        "trufflehog": {
+          "detected": true,
+          "exit_code": 183,
+          "findings": 1,
+          "detector": "PrivateKey"
+        }
+      },
+      {
+        "id": "openssh-private-key",
+        "credential_class": "OpenSSH private key",
+        "expected_control_decision": "block",
+        "gitleaks": {
+          "detected": true,
+          "exit_code": 1,
+          "findings": 1,
+          "detector": "private-key"
+        },
+        "trufflehog": {
+          "detected": true,
+          "exit_code": 183,
+          "findings": 1,
+          "detector": "PrivateKey"
+        }
+      },
+      {
+        "id": "symmetric-key",
+        "credential_class": "Symmetric encryption key",
+        "expected_control_decision": "block",
+        "gitleaks": {
+          "detected": true,
+          "exit_code": 1,
+          "findings": 1,
+          "detector": "generic-api-key"
+        },
+        "trufflehog": {
+          "detected": false,
+          "exit_code": 0,
+          "findings": 0,
+          "detector": null
+        }
+      },
+      {
+        "id": "webhook-secret",
+        "credential_class": "Webhook signing secret",
+        "expected_control_decision": "block",
+        "gitleaks": {
+          "detected": true,
+          "exit_code": 1,
+          "findings": 1,
+          "detector": "generic-api-key"
+        },
+        "trufflehog": {
+          "detected": false,
+          "exit_code": 0,
+          "findings": 0,
+          "detector": null
+        }
+      },
+      {
+        "id": "base64-custom",
+        "credential_class": "Base64-encoded custom token",
+        "expected_control_decision": "block",
+        "gitleaks": {
+          "detected": true,
+          "exit_code": 1,
+          "findings": 2,
+          "detector": "generic-api-key,synthetic-demo-api-key"
+        },
+        "trufflehog": {
+          "detected": true,
+          "exit_code": 183,
+          "findings": 1,
+          "detector": "CustomRegex"
+        }
+      },
+      {
+        "id": "runtime-reference",
+        "credential_class": "Runtime secret reference",
+        "expected_control_decision": "pass",
+        "gitleaks": {
+          "detected": false,
+          "exit_code": 0,
+          "findings": 0,
+          "detector": null
+        },
+        "trufflehog": {
+          "detected": false,
+          "exit_code": 0,
+          "findings": 0,
+          "detector": null
+        }
+      },
+      {
+        "id": "placeholder",
+        "credential_class": "Placeholder value",
+        "expected_control_decision": "pass",
+        "gitleaks": {
+          "detected": false,
+          "exit_code": 0,
+          "findings": 0,
+          "detector": null
+        },
+        "trufflehog": {
+          "detected": false,
+          "exit_code": 0,
+          "findings": 0,
+          "detector": null
+        }
+      },
+      {
+        "id": "public-key",
+        "credential_class": "SSH public key",
+        "expected_control_decision": "pass",
+        "gitleaks": {
+          "detected": false,
+          "exit_code": 0,
+          "findings": 0,
+          "detector": null
+        },
+        "trufflehog": {
+          "detected": false,
+          "exit_code": 0,
+          "findings": 0,
+          "detector": null
+        }
+      }
+    ]
+  },
+  "summary": {
+    "note": "Scenario detections are not a production accuracy rate or total-coverage score.",
+    "gitleaks_positive_scenarios_detected": 12,
+    "trufflehog_positive_scenarios_detected": 8
+  },
+  "tools": {
+    "gitleaks": {
+      "version": "8.30.1",
+      "configuration": "defaults plus repository custom rule and one decoding pass",
+      "report_handling": "redacted"
+    },
+    "trufflehog": {
+      "version": "3.97.1",
+      "configuration": "built-in detectors plus equivalent custom rule",
+      "report_handling": "temporary raw JSON deleted on exit"
+    },
+    "github_secret_protection": {
+      "executed": false,
+      "reason": "Host-native behavior requires an eligible disposable remote repository, enabled features and patterns, and server-observed pushes.",
+      "procedure": "results/github-secret-protection-test-procedure.md"
+    }
+  }
+}

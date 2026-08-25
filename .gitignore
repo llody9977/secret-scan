@@ -1,0 +1,16 @@
+# Local credentials and environment overrides
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+
+# Secret-scan output may contain sensitive metadata
+gitleaks-report.*
+results/generated/
+
+# Editor and operating-system files
+.DS_Store
+.idea/
+.vscode/

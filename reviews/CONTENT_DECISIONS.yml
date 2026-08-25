@@ -1,0 +1,386 @@
+{
+  "schema_version": 1,
+  "decisions": [
+    {
+      "id": "CD-0001",
+      "title": "Materialize fictional credentials only in temporary test storage",
+      "status": "accepted",
+      "implementation_state": "implemented",
+      "scope": {
+        "files": [
+          ".gitleaks.toml",
+          "scripts/test-secret-scan.sh",
+          "testdata/leaked.env.tmpl",
+          "testdata/safe.env",
+          "results/local-scan-results.json",
+          "docs/index.html",
+          "secret-scanning.md"
+        ],
+        "concepts": [
+          "synthetic secret fixture",
+          "failure-versus-fix demonstration",
+          "redacted executable evidence"
+        ]
+      },
+      "originating_feedback": "The repository needs synthetic data and executable evidence, while the security rules prohibit hardcoded credentials and require a weakness demonstration to be paired with its mitigation.",
+      "decision": "Commit only a placeholder and a runtime-reference fixture. Generate a deterministic fictional DEMO-format value under mktemp, scan it offline, require one positive and one negative result, verify redaction, and delete the temporary directory on exit.",
+      "rationale": "A committed realistic token would teach an unsafe fixture pattern and could trigger provider or platform handling. Runtime materialization preserves the controlled detector contrast without storing a usable or complete credential-shaped value in Git history.",
+      "authoritative_sources": [
+        {
+          "title": "Gitleaks repository and configuration documentation",
+          "url": "https://github.com/gitleaks/gitleaks",
+          "supports": "Custom rules, directory scanning, redaction, report formats, and finding exit codes used by the controlled test."
+        }
+      ],
+      "verification_methods": [
+        "Run ./scripts/test-secret-scan.sh and confirm one synthetic finding, zero safe findings, offline operation, and absence of the materialized value from the report.",
+        "Run gitleaks dir over the repository and confirm the committed source itself is clean."
+      ],
+      "approved_outcome": "Keep the positive and negative fixtures, detector, test, and redacted JSON snapshot versioned together; never replace the placeholder with a live, provider-shaped, or issued credential.",
+      "invalidation_conditions": [
+        "The fictional format becomes accepted by a real provider.",
+        "Gitleaks changes redaction, report, or exit-code behavior so the test no longer establishes the stated properties.",
+        "A provider publishes a purpose-built non-working test token that improves the required detector coverage without adding risk."
+      ],
+      "related_decisions": ["CD-0002"],
+      "supersedes": [],
+      "superseded_by": null,
+      "originated_on": "2026-08-25",
+      "last_reviewed_on": "2026-08-25"
+    },
+    {
+      "id": "CD-0002",
+      "title": "Separate staged pre-commit scanning from full-history push gates",
+      "status": "accepted",
+      "implementation_state": "implemented",
+      "scope": {
+        "files": [
+          ".pre-commit-config.yaml",
+          ".github/workflows/gitleaks.yml",
+          "docs/index.html",
+          "README.md",
+          "secret-scanning.md"
+        ],
+        "concepts": [
+          "pre-commit gate",
+          "pre-push history gate",
+          "required CI secret scan",
+          "initial root commit"
+        ]
+      },
+      "originating_feedback": "The repository standard requires both local pre-commit/pre-push blocking and a Gitleaks CI gate. The supplied official hook scans staged content, which does not by itself establish that already committed push history is scanned.",
+      "decision": "Use the official system hook only at pre-commit, add a separate local full-history Gitleaks command at pre-push, and run the Gitleaks binary against full fetched history in CI.",
+      "rationale": "Each gate now scans the state it claims to protect. The separation avoids describing an installed pre-push hook as protective when its underlying command is still limited to staged content.",
+      "authoritative_sources": [
+        {
+          "title": "Gitleaks pre-commit hook definition",
+          "url": "https://github.com/gitleaks/gitleaks/blob/master/.pre-commit-hooks.yaml",
+          "supports": "The official hook entry invokes gitleaks git with pre-commit and staged flags."
+        },
+        {
+          "title": "Gitleaks repository documentation",
+          "url": "https://github.com/gitleaks/gitleaks",
+          "supports": "Git-history and directory scan modes, full redaction, configuration, and exit behavior."
+        }
+      ],
+      "verification_methods": [
+        "Validate .pre-commit-config.yaml and inspect the generated pre-commit and pre-push hook types.",
+        "Create a temporary repository with one root commit and confirm gitleaks git scans one commit successfully without relying on a parent commit."
+      ],
+      "approved_outcome": "Keep the staged scan at pre-commit, full-history scan at pre-push, and checksum-verified full-history scan in CI. Make the Gitleaks full-history gate a required status check after hosting.",
+      "invalidation_conditions": [
+        "The official Gitleaks hook changes to correctly derive and scan the pushed commit range at pre-push.",
+        "Gitleaks changes its Git command or initial-commit behavior.",
+        "The repository host or branching model changes the history or enforcement boundary."
+      ],
+      "related_decisions": ["CD-0001", "CD-0003"],
+      "supersedes": [],
+      "superseded_by": null,
+      "originated_on": "2026-08-25",
+      "last_reviewed_on": "2026-08-25"
+    },
+    {
+      "id": "CD-0003",
+      "title": "Present scanner selection as conditional and disclose current product boundaries",
+      "status": "superseded",
+      "implementation_state": "implemented",
+      "scope": {
+        "files": ["README.md", "docs/index.html", "secret-scanning.md"],
+        "concepts": [
+          "Gitleaks maintenance posture",
+          "TruffleHog verification",
+          "GitHub Secret Protection plan eligibility",
+          "scanner selection rule"
+        ]
+      },
+      "originating_feedback": "The requested comparison must support a real selection decision and include GitHub enterprise caveats without promoting one scanner beyond what current primary sources support.",
+      "decision": "Use Gitleaks for the portable executable baseline, disclose its security-patch-only maintenance posture, present TruffleHog for active verification and wider source coverage, and state GitHub Secret Protection eligibility by repository ownership and plan as of the verification date.",
+      "rationale": "The three controls are viable candidates for the same repository-gate decision but have different deployment, verification, governance, license, and plan boundaries. Conditional selection avoids turning one working demonstration into a universal recommendation.",
+      "authoritative_sources": [
+        {
+          "title": "Gitleaks repository",
+          "url": "https://github.com/gitleaks/gitleaks",
+          "supports": "Current scan modes, MIT license, and feature-complete/security-patches-only notice."
+        },
+        {
+          "title": "TruffleHog repository",
+          "url": "https://github.com/trufflesecurity/trufflehog",
+          "supports": "Source coverage, verification classes, CI controls, custom-detector status, and AGPL-3.0 license."
+        },
+        {
+          "title": "GitHub enabling secret scanning",
+          "url": "https://docs.github.com/en/code-security/how-tos/secure-your-secrets/detect-secret-leaks/enable-secret-scanning",
+          "supports": "Current availability for public, organization-owned private/internal, and user-owned repositories."
+        }
+      ],
+      "verification_methods": [
+        "Check current official release APIs for the versions named in the article and re-read each product's official documentation on the recorded verification date."
+      ],
+      "approved_outcome": "Keep the comparison on one repository-control axis, retain the dated caveats, and recommend combinations only as defense in depth rather than as a guarantee.",
+      "invalidation_conditions": [
+        "Any compared tool changes its license, maintenance status, verification behavior, source coverage, or command semantics.",
+        "GitHub changes Secret Protection packaging, repository eligibility, or push-protection limits.",
+        "The repository's required scan targets expand beyond Git and files."
+      ],
+      "related_decisions": ["CD-0002"],
+      "supersedes": [],
+      "superseded_by": "CD-0005",
+      "originated_on": "2026-08-25",
+      "last_reviewed_on": "2026-08-25"
+    },
+    {
+      "id": "CD-0004",
+      "title": "Keep the repository README concise and publish the full guide from docs",
+      "status": "accepted",
+      "implementation_state": "implemented",
+      "scope": {
+        "files": [
+          "README.md",
+          "docs/index.html",
+          "docs/styles.css",
+          "docs/og.jpg",
+          ".github/workflows/pages.yml",
+          ".github/workflows/ci.yml",
+          "scripts/check-site.py"
+        ],
+        "concepts": [
+          "repository summary",
+          "GitHub Pages article",
+          "static-site validation",
+          "social preview"
+        ]
+      },
+      "originating_feedback": "The repository README should provide only a summary while a GitHub Pages site expands the material, following the structure used by the owner's ecb-mode, ctr-mode, and cbc-mode repositories.",
+      "decision": "Keep the README focused on the thesis, link, reproducible evidence, gates, and repository map. Publish the detailed article as a dependency-free responsive page from docs/ with a pinned GitHub Actions workflow and validate local assets and anchors in CI.",
+      "rationale": "This preserves a fast repository entry point while giving the long-form article a readable web presentation. The docs/ layout and Pages workflow are consistent with the owner's existing security-education repositories, and the static implementation adds no browser runtime dependency.",
+      "authoritative_sources": [
+        {
+          "title": "GitHub: Using custom workflows with GitHub Pages",
+          "url": "https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages",
+          "supports": "The configure, artifact upload, deployment, permissions, and github-pages environment flow used by the workflow."
+        }
+      ],
+      "verification_methods": [
+        "Run python3 scripts/check-site.py and confirm the page has one H1, unique IDs, resolvable in-page anchors, present local assets, and balanced CSS braces.",
+        "Serve docs/ locally and load the article, stylesheet, and social preview image over HTTP.",
+        "Run actionlint and the repository secret scan after adding the site."
+      ],
+      "approved_outcome": "Keep the full guide in docs/, keep README as the summary and operator entry point, and publish docs/ through GitHub Actions after the repository is hosted and Pages is configured to use GitHub Actions.",
+      "invalidation_conditions": [
+        "The repository name or owner changes, invalidating the Pages, source, badge, or social-preview URLs.",
+        "GitHub changes the custom Pages workflow contract or action permissions.",
+        "The detailed page and the executable evidence drift from each other.",
+        "The owner chooses another canonical documentation surface."
+      ],
+      "related_decisions": ["CD-0001", "CD-0002", "CD-0003"],
+      "supersedes": [],
+      "superseded_by": null,
+      "originated_on": "2026-08-25",
+      "last_reviewed_on": "2026-08-25"
+    },
+    {
+      "id": "CD-0005",
+      "title": "Select a baseline first and map optional scanners to distinct gates",
+      "status": "superseded",
+      "implementation_state": "implemented",
+      "scope": {
+        "files": [
+          "README.md",
+          "secret-scanning.md",
+          "docs/index.html",
+          ".trufflehog.yml",
+          "scripts/compare-secret-scanners.sh",
+          "results/scanner-comparison-results.json",
+          ".github/workflows/gitleaks.yml",
+          ".github/workflows/scanner-comparison.yml",
+          ".github/workflows/trufflehog-discovery.yml"
+        ],
+        "concepts": [
+          "evaluation before comparison",
+          "tool-to-gate mapping",
+          "Gitleaks portable baseline",
+          "GitHub hosted push boundary",
+          "TruffleHog scheduled discovery",
+          "controlled cross-engine corpus"
+        ]
+      },
+      "originating_feedback": "The earlier comparison was unclear about whether readers should run all tools at every gate. The requested revision is to define evaluation criteria first, compare engines on the same synthetic corpus, disclose limitations, and let readers add one or more controls according to business need.",
+      "decision": "Recommend Gitleaks as this repository's portable pre-commit, pre-push, and required full-history CI baseline; add GitHub push protection at the hosted push boundary when eligible; add TruffleHog as scheduled discovery or authorized incident triage when broader sources or validity checks justify it. Keep the cross-engine workflow explicitly non-blocking evidence rather than a merge gate.",
+      "rationale": "The tools do not provide identical controls at identical boundaries. A single portable baseline reduces operational ambiguity, native push protection adds prevention before pull-request CI, and broader discovery or active verification belongs where its network, report-handling, latency, license, and triage costs address a stated requirement. Separating comparison evidence from enforcement prevents an experimental second engine from silently becoming policy.",
+      "authoritative_sources": [
+        {
+          "title": "Gitleaks repository",
+          "url": "https://github.com/gitleaks/gitleaks",
+          "supports": "Local, Git-history, custom-rule, redaction, and exit-code capabilities used by the baseline gate."
+        },
+        {
+          "title": "TruffleHog repository and custom detector documentation",
+          "url": "https://github.com/trufflesecurity/trufflehog",
+          "supports": "Source breadth, verification behavior, fail exit semantics, report behavior, custom detectors, and licensing."
+        },
+        {
+          "title": "GitHub secret security documentation",
+          "url": "https://docs.github.com/en/code-security/concepts/secret-security/secret-security-with-github",
+          "supports": "Host-native push protection, monitoring surfaces, alerts, provider integration, and governance."
+        }
+      ],
+      "verification_methods": [
+        "Run ./scripts/compare-secret-scanners.sh and confirm both pinned engines block the three positive scenarios and pass the runtime-reference scenario with the documented detector names and exit codes.",
+        "Confirm the generated JSON exactly matches results/scanner-comparison-results.json and contains no raw credential-shaped fixture material.",
+        "Run each full-history workflow command against a temporary root-commit repository and confirm the committed repository is clean.",
+        "Review the page and article in order: evaluation criteria, controlled results, limitations, then the explicit tool-to-gate recommendation."
+      ],
+      "approved_outcome": "Keep one clearly named required gate candidate, keep comparison and scheduled discovery workflows separate and non-required by default, preserve safe metadata only, and require a measured business justification before adding another blocking engine.",
+      "invalidation_conditions": [
+        "The repository's hosting platform, required scan scope, threat model, or workflow boundaries change.",
+        "Measured production data shows that another engine materially outperforms the baseline on required coverage, noise, latency, reliability, and output-safety criteria.",
+        "A tool changes its license, maintenance posture, verification, custom-rule, report, or exit-code behavior.",
+        "GitHub changes Secret Protection packaging, eligibility, push-protection semantics, or bypass governance."
+      ],
+      "related_decisions": ["CD-0001", "CD-0002", "CD-0004"],
+      "supersedes": ["CD-0003"],
+      "superseded_by": "CD-0007",
+      "originated_on": "2026-08-25",
+      "last_reviewed_on": "2026-08-25"
+    },
+    {
+      "id": "CD-0006",
+      "title": "Use neutral result language in reader-facing content",
+      "status": "accepted",
+      "implementation_state": "implemented",
+      "scope": {
+        "files": [
+          "README.md",
+          "secret-scanning.md",
+          "docs/index.html",
+          "results/README.md",
+          ".github/workflows/gitleaks.yml",
+          ".github/workflows/scanner-comparison.yml",
+          ".github/workflows/trufflehog-discovery.yml"
+        ],
+        "concepts": [
+          "reader-facing assurance language",
+          "controlled test results",
+          "updated date label",
+          "internal review terminology"
+        ]
+      },
+      "originating_feedback": "The reader-facing article should not call its claims evidence or verified. It should state versions, conditions, observed test results, limitations, and references directly, while review terminology remains internal.",
+      "decision": "Use neutral result language in README, the long-form article, the GitHub Pages view, result files, and visible workflow labels. Keep assurance and review terminology only inside reviews/ and the review-support scripts. Preserve exact third-party command flags where they are required for execution.",
+      "rationale": "Named versions, conditions, outputs, and limitations let readers assess the result without an extra assurance label. Separating public technical reporting from the internal review record also reduces the chance that process language is mistaken for an independent certification.",
+      "authoritative_sources": [],
+      "verification_methods": [
+        "Search reader-facing files for evidence, verified, verify, verification, prove, and proof; allow only exact third-party command flags required to disable outbound provider checks.",
+        "Confirm the page status uses Updated, the public folder is results/, and the optional workflow job is Comparison only — not a merge gate.",
+        "Regenerate both JSON result files and run the static site and workflow checks after the terminology change."
+      ],
+      "approved_outcome": "Reader-facing content reports what ran and what returned, names what was not measured, and points to primary references. Internal review records may retain review-specific terminology.",
+      "invalidation_conditions": [
+        "The owner explicitly adopts a formal assurance or certification framework for public reporting.",
+        "A third-party term must be quoted exactly to explain a required command or product result class.",
+        "The repository's audience or publication purpose changes materially."
+      ],
+      "related_decisions": ["CD-0004", "CD-0005"],
+      "supersedes": [],
+      "superseded_by": null,
+      "originated_on": "2026-08-25",
+      "last_reviewed_on": "2026-08-25"
+    },
+    {
+      "id": "CD-0007",
+      "title": "Use a representative credential matrix and distinguish detector coverage from source reach",
+      "status": "accepted",
+      "implementation_state": "implemented",
+      "scope": {
+        "files": [
+          "README.md",
+          "secret-scanning.md",
+          "docs/index.html",
+          "scripts/compare-secret-scanners.sh",
+          "results/scanner-comparison-results.json",
+          "results/github-secret-protection-test-procedure.md",
+          ".github/workflows/gitleaks.yml",
+          ".github/workflows/scanner-comparison.yml"
+        ],
+        "concepts": [
+          "representative credential classes",
+          "local scanner result",
+          "GitHub hosted test",
+          "custom internal patterns",
+          "source reach versus detector coverage",
+          "central enforcement schedule",
+          "risk-based defense in depth"
+        ]
+      },
+      "originating_feedback": "The four-case comparison omitted important password, token, service-account, internal-format, and encoding classes; it did not include GitHub in the effectiveness matrix; broad discovery was not explained; and the gate map did not clearly compensate for per-clone hook installation with push, merge, and daily CI enforcement.",
+      "decision": "Use an 18-scenario temporary corpus with 15 credential-shaped positives and three safe negatives; report individual Gitleaks and TruffleHog detections and misses; include GitHub's documented pattern behavior in the same decision matrix while keeping its remote result pending a disposable eligible host test; explain TruffleHog breadth as source reach and optional provider checks; compare custom-pattern facilities; and run the central Gitleaks control on every push and pull request, merge pushes, daily, and manually.",
+      "rationale": "The earlier four-case corpus hid material counterexamples and made the tools appear more interchangeable than they are. Individual shape results support a conditional choice without turning a small corpus into an accuracy score. GitHub's host boundary cannot be simulated locally, so its documented capability and remote result must remain distinct. Local hooks improve feedback but cannot enforce policy across clones, which makes central event and scheduled coverage necessary.",
+      "authoritative_sources": [
+        {
+          "title": "Gitleaks repository and documentation",
+          "url": "https://github.com/gitleaks/gitleaks",
+          "supports": "Custom TOML rules, decoding, redaction, Git and filesystem scanning, pre-commit integration, and report behavior."
+        },
+        {
+          "title": "TruffleHog repository and custom detector documentation",
+          "url": "https://github.com/trufflesecurity/trufflehog",
+          "supports": "Source connectors, provider checks, detector behavior, custom detector configuration, and result handling."
+        },
+        {
+          "title": "GitHub supported secret-scanning patterns",
+          "url": "https://docs.github.com/en/code-security/reference/secret-security/supported-secret-scanning-patterns",
+          "supports": "Provider, generic, AI-detected, custom-pattern, and push-protection capability boundaries."
+        },
+        {
+          "title": "GitHub secret-scanning scope",
+          "url": "https://docs.github.com/en/code-security/reference/secret-security/secret-scanning-scope",
+          "supports": "Paired-pattern, token-version, size, timeout, finding-count, and push-protection limits."
+        },
+        {
+          "title": "GitHub custom-pattern management",
+          "url": "https://docs.github.com/en/code-security/how-tos/secure-your-secrets/customize-leak-detection/manage-custom-patterns",
+          "supports": "Dry-run, publish, and custom-pattern push-protection behavior."
+        }
+      ],
+      "verification_methods": [
+        "Run ./scripts/compare-secret-scanners.sh and confirm the 18 exact pinned outcomes, 12 of 15 Gitleaks positive detections, eight of 15 TruffleHog positive detections, and three safe negatives passed by both.",
+        "Regenerate results/scanner-comparison-results.json and confirm it contains only safe metadata and names the separate GitHub host-test procedure.",
+        "Validate that the Gitleaks workflow triggers on push, pull request, schedule, and manual dispatch, and that the comparison workflow remains explicitly non-required.",
+        "Read the article and page in order: evaluation criteria, scenario matrix, capability explanation, limitations, then gate-specific recommendation."
+      ],
+      "approved_outcome": "Keep Gitleaks as this repository's scoped portable baseline, not a universal winner; add GitHub push protection when eligible and tested; add TruffleHog or custom rules when an identified detector or source gap justifies them; keep local hooks as feedback and central CI as enforcement; and never turn scenario fractions into production accuracy claims.",
+      "invalidation_conditions": [
+        "A pinned scanner version or configuration changes one or more recorded scenario outcomes.",
+        "The organization's secret inventory, hosting platform, data boundary, or risk appetite changes materially.",
+        "GitHub changes pattern, plan, custom-pattern, or push-protection behavior.",
+        "Hosted testing produces results that contradict the documented-behavior column or alter the recommended control mix.",
+        "Production measurements show unacceptable false positives, latency, failures, or missed required formats."
+      ],
+      "related_decisions": ["CD-0001", "CD-0002", "CD-0004", "CD-0006"],
+      "supersedes": ["CD-0005"],
+      "superseded_by": null,
+      "originated_on": "2026-08-25",
+      "last_reviewed_on": "2026-08-25"
+    }
+  ]
+}

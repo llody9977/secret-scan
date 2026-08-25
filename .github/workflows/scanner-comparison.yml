@@ -1,0 +1,63 @@
+name: Controlled scanner comparison
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    name: Comparison only — not a merge gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GITLEAKS_VERSION: "8.30.1"
+      GITLEAKS_ARCHIVE_SHA256: "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb"
+      TRUFFLEHOG_VERSION: "3.97.1"
+      TRUFFLEHOG_ARCHIVE_SHA256: "f863ea3a8d786f7d097870496c977944cce7372a2fe1e56707d965016e543ece"
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install pinned scanner binaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          bin_dir="$RUNNER_TEMP/scanner-bin"
+          mkdir -p "$bin_dir"
+
+          gitleaks_archive="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          gitleaks_path="$RUNNER_TEMP/$gitleaks_archive"
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${gitleaks_archive}" \
+            --output "$gitleaks_path"
+          printf '%s  %s\n' "$GITLEAKS_ARCHIVE_SHA256" "$gitleaks_path" \
+            | sha256sum --check --strict
+          tar -xzf "$gitleaks_path" -C "$bin_dir" gitleaks
+
+          trufflehog_archive="trufflehog_${TRUFFLEHOG_VERSION}_linux_amd64.tar.gz"
+          trufflehog_path="$RUNNER_TEMP/$trufflehog_archive"
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location \
+            "https://github.com/trufflesecurity/trufflehog/releases/download/v${TRUFFLEHOG_VERSION}/${trufflehog_archive}" \
+            --output "$trufflehog_path"
+          printf '%s  %s\n' "$TRUFFLEHOG_ARCHIVE_SHA256" "$trufflehog_path" \
+            | sha256sum --check --strict
+          tar -xzf "$trufflehog_path" -C "$bin_dir" trufflehog
+
+          chmod 0755 "$bin_dir/gitleaks" "$bin_dir/trufflehog"
+          printf '%s\n' "$bin_dir" >> "$GITHUB_PATH"
+
+      - name: Run controlled corpus through both engines
+        run: ./scripts/compare-secret-scanners.sh
+
+      - name: Explain workflow semantics
+        run: |
+          printf '%s\n' \
+            'This job reproduces the controlled comparison.' \
+            'Do not configure it as the required merge gate.' \
+            'Use the separate Gitleaks full-history gate for that purpose.'

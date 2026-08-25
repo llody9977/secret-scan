@@ -1,0 +1,23 @@
+name: Feature request
+description: Propose a new defensive capability or article improvement
+labels: ["feature", "needs-triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What decision, risk, or workflow should this improve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+    validations:
+      required: false
+  - type: textarea
+    id: references
+    attributes:
+      label: References or safe test design
+    validations:
+      required: false

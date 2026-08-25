@@ -1,0 +1,27 @@
+name: Bug report
+description: Report behavior that is incorrect or unsafe
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: Do not paste a credential or unredacted scanner output. Follow SECURITY.md for vulnerabilities.
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed and expected behavior
+      description: Describe what happened and what should have happened.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Safe reproduction
+      description: Use only fictional, non-working data and remove sensitive output.
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Commit and scanner versions
+    validations:
+      required: true
