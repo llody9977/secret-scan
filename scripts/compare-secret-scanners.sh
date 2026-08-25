@@ -150,7 +150,9 @@ while IFS= read -r scenario; do
 
   # Gitleaks output is persisted as safe metadata only. Its match-bearing fields
   # must be empty or contain the scanner's full-redaction marker.
-  if ! jq -e 'all(.[]; [(.Secret // ""), (.Match // "")] | all(. == "" or contains("REDACTED")))' \
+  if ! jq -e 'all(.[];
+    ((.Secret // "") == "" or (.Secret // "") == "REDACTED") and
+    ((.Match // "") == "" or ((.Match // "") | contains("REDACTED"))))' \
     "$gitleaks_report" >/dev/null; then
     printf 'Gitleaks report contains unredacted match data for %s\n' "$scenario_id" >&2
     exit 1

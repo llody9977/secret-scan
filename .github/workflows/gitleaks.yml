@@ -44,5 +44,90 @@ jobs:
       - name: Run positive and negative scenarios
         run: ./scripts/test-secret-scan.sh
 
-      - name: Scan complete Git history
-        run: gitleaks git --config .gitleaks.toml --max-decode-depth=1 --no-banner --redact=100 --verbose .
+      - name: Scan complete Git history and publish the job summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/gitleaks-results.json"
+
+          set +e
+          gitleaks git \
+            --config .gitleaks.toml \
+            --exit-code 1 \
+            --max-decode-depth=1 \
+            --no-banner \
+            --redact=100 \
+            --report-format json \
+            --report-path "$report" \
+            .
+          scan_status=$?
+          set -e
+
+          status="$scan_status"
+          validation_error=false
+          if [[ ! -f "$report" ]] || ! jq -e 'type == "array"' "$report" >/dev/null; then
+            findings="Unavailable"
+            result="Scanner error: report missing or invalid"
+            status=2
+            validation_error=true
+          else
+            findings="$(jq 'length' "$report")"
+            result="No findings"
+            if [[ "$findings" -gt 0 ]]; then
+              result="$findings finding(s); gate failed"
+              status=1
+            fi
+
+            # Do not let a report or summary become another disclosure surface.
+            if ! jq -e 'all(.[];
+              ((.Secret // "") == "" or (.Secret // "") == "REDACTED") and
+              ((.Match // "") == "" or ((.Match // "") | contains("REDACTED"))))' \
+              "$report" >/dev/null; then
+              status=2
+              result="Scanner error: report redaction check failed"
+              validation_error=true
+            fi
+          fi
+
+          if [[ "$validation_error" == false ]] \
+            && [[ "$scan_status" -ne 0 ]] \
+            && ! { [[ "$scan_status" -eq 1 ]] && [[ "$findings" -gt 0 ]]; }; then
+            status="$scan_status"
+            result="Scanner error: exit code $scan_status"
+          fi
+
+          summary_event="$(jq -rn --arg value "$GITHUB_EVENT_NAME" '$value | gsub("[^A-Za-z0-9._:/@+-]"; "_")')"
+          summary_ref="$(jq -rn --arg value "$GITHUB_REF" '$value | gsub("[^A-Za-z0-9._:/@+-]"; "_")')"
+
+          # shellcheck disable=SC2016
+          {
+            printf '## Gitleaks full-history scan\n\n'
+            printf '| Field | Result |\n'
+            printf '| --- | --- |\n'
+            printf '| Outcome | %s |\n' "$result"
+            printf '| Scanner | Gitleaks `%s` |\n' "$GITLEAKS_VERSION"
+            printf '| Scope | Complete checked-out Git history; intentional `testdata/synthetic/` corpus excluded by `.gitleaks.toml` |\n'
+            printf '| Trigger | `%s` on `%s` |\n' "$summary_event" "$summary_ref"
+            printf '| Commit | [`%s`](%s/%s/commit/%s) |\n' \
+              "${GITHUB_SHA:0:7}" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_SHA"
+            printf '| Control role | Detective for content already pushed; preventive for merge or promotion only when this exact status is required |\n'
+            printf '| Report handling | Secret fields checked for full redaction; contextual match text is not published; report remains in temporary runner storage and is not uploaded |\n'
+
+            if [[ "$findings" != "Unavailable" ]] && [[ "$findings" -gt 0 ]]; then
+              printf '\n### Findings by detector\n\n'
+              printf '| Detector | Count |\n'
+              printf '| --- | ---: |\n'
+              jq -r 'group_by(.RuleID)[] |
+                "| `\(.[0].RuleID | tostring | gsub("[^A-Za-z0-9._:/+-]"; "_"))` | \(length) |"' "$report"
+              printf '\nMatched values and locations are intentionally omitted from this summary.\n'
+            fi
+          } >>"$GITHUB_STEP_SUMMARY"
+
+          if [[ "$status" -eq 1 ]] && [[ "$findings" != "Unavailable" ]] && [[ "$findings" -gt 0 ]]; then
+            printf 'Gitleaks reported %s finding(s).\n' "$findings" >&2
+            exit 1
+          fi
+          if [[ "$status" -ne 0 ]]; then
+            printf 'Gitleaks failed with exit code %s.\n' "$status" >&2
+            exit "$status"
+          fi

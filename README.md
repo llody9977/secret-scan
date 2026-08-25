@@ -12,10 +12,11 @@ A scanner is only one part of a secret-scanning control. Effective protection al
 
 ## Practical recommendation
 
-- Use pre-commit and pre-push hooks for fast developer feedback; they are per-clone and bypassable, so they are not organization-wide enforcement.
-- Enable host push protection for the supported patterns that must not reach the remote. Test the actual plan, pattern versions, service limits, and bypass policy.
-- Require a portable CI scanner for merge policy and internal formats. In this repository that role belongs to **Gitleaks full-history gate**.
-- Add TruffleHog as scheduled or wider-source discovery when its distinct detectors, source connectors, or approved provider checks close a named risk gap.
+- Enable GitHub secret scanning and push protection first. It is preventive at GitHub's receive boundary for covered patterns; the provider detector expressions are host managed in this public personal repository.
+- Add pre-commit and pre-push hooks for fast developer feedback; they are per-clone and bypassable, so they are not organization-wide enforcement.
+- Require a portable CI scanner for merge policy and internal formats. In this repository, **Gitleaks full-history gate** is detective for first remote exposure and preventive for merge when branch policy requires it.
+- Run scheduled scans for hygiene and residual gaps. Add TruffleHog when its distinct detectors, source connectors, or approved provider checks close a named business need.
+- Route confirmed findings into incident response: revoke or rotate first, investigate use, replace storage, remove residue, and add a safe regression case.
 
 This is not a recommendation to run every engine at every gate.
 

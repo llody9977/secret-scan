@@ -40,7 +40,7 @@ jobs:
           chmod 0755 "$bin_dir/trufflehog"
           printf '%s\n' "$bin_dir" >> "$GITHUB_PATH"
 
-      - name: Discover findings without outbound provider checks
+      - name: Discover findings and publish the job summary
         shell: bash
         run: |
           set -euo pipefail
@@ -55,12 +55,63 @@ jobs:
             --fail \
             --fail-on-scan-errors \
             >"$report"
-          status=$?
+          scan_status=$?
           set -e
 
-          findings="$(jq -s 'length' "$report")"
+          status="$scan_status"
+          validation_error=false
+          if jq -s -e 'type == "array" and all(.[]; type == "object" and (.DetectorName | type == "string"))' \
+            "$report" >/dev/null 2>&1; then
+            findings="$(jq -s 'length' "$report")"
+            result="No findings"
+            if [[ "$findings" -gt 0 ]]; then
+              result="$findings candidate finding(s); discovery failed"
+              status=183
+            fi
+          else
+            findings="Unavailable"
+            result="Scanner error: output was not valid JSON Lines"
+            status=2
+            validation_error=true
+          fi
+
+          if [[ "$validation_error" == false ]] \
+            && [[ "$scan_status" -ne 0 ]] \
+            && ! { [[ "$scan_status" -eq 183 ]] && [[ "$findings" -gt 0 ]]; }; then
+            status="$scan_status"
+            result="Scanner error: exit code $scan_status"
+          fi
+
+          summary_event="$(jq -rn --arg value "$GITHUB_EVENT_NAME" '$value | gsub("[^A-Za-z0-9._:/@+-]"; "_")')"
+          summary_ref="$(jq -rn --arg value "$GITHUB_REF" '$value | gsub("[^A-Za-z0-9._:/@+-]"; "_")')"
+
+          # shellcheck disable=SC2016
+          {
+            printf '## TruffleHog scheduled discovery\n\n'
+            printf '| Field | Result |\n'
+            printf '| --- | --- |\n'
+            printf '| Outcome | %s |\n' "$result"
+            printf '| Scanner | TruffleHog `%s` |\n' "$TRUFFLEHOG_VERSION"
+            printf '| Scope | Complete checked-out Git history; intentional `testdata/synthetic/` corpus excluded by `.trufflehog-exclude-paths.txt` |\n'
+            printf '| Trigger | `%s` on `%s` |\n' "$summary_event" "$summary_ref"
+            printf '| Commit | [`%s`](%s/%s/commit/%s) |\n' \
+              "${GITHUB_SHA:0:7}" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_SHA"
+            printf '| Provider checks | Disabled; no candidate is sent to an issuing service |\n'
+            printf '| Control role | Detective hygiene and legacy discovery; this workflow does not prevent the first remote push or merge |\n'
+            printf '| Report handling | Raw JSON stays in temporary runner storage and is not uploaded |\n'
+
+            if [[ "$findings" != "Unavailable" ]] && [[ "$findings" -gt 0 ]]; then
+              printf '\n### Findings by detector\n\n'
+              printf '| Detector | Count |\n'
+              printf '| --- | ---: |\n'
+              jq -sr 'group_by(.DetectorName)[] |
+                "| `\(.[0].DetectorName | gsub("[^A-Za-z0-9._:/+-]"; "_"))` | \(length) |"' "$report"
+              printf '\nMatched values and locations are intentionally omitted. Revoke or rotate confirmed credentials before repository cleanup.\n'
+            fi
+          } >>"$GITHUB_STEP_SUMMARY"
+
           printf 'TruffleHog exit code: %s; findings: %s\n' "$status" "$findings"
-          if [[ "$status" -eq 183 ]]; then
+          if [[ "$status" -eq 183 ]] && [[ "$findings" != "Unavailable" ]] && [[ "$findings" -gt 0 ]]; then
             printf 'Discovery found candidate credentials. Treat them as incident data; the raw report remains in temporary runner storage.\n' >&2
             exit 1
           fi
