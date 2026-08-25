@@ -1,6 +1,7 @@
 # Secret scanning reduces credential-leak risk
 
 ![CI](https://github.com/llody9977/secret-scan/actions/workflows/ci.yml/badge.svg)
+![CodeQL](https://github.com/llody9977/secret-scan/actions/workflows/codeql.yml/badge.svg)
 ![Secret scan](https://github.com/llody9977/secret-scan/actions/workflows/gitleaks.yml/badge.svg)
 ![Pages](https://github.com/llody9977/secret-scan/actions/workflows/pages.yml/badge.svg)
 ![License](https://img.shields.io/github/license/llody9977/secret-scan)

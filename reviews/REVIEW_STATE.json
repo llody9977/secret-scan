@@ -1,0 +1,109 @@
+{
+  "last_review": {
+    "branch": "main",
+    "commit": "256446593051d22c01ea593919526e621333d1e6",
+    "date": "2026-08-25",
+    "effort": "xhigh",
+    "model": "gpt-5"
+  },
+  "passes": {
+    "adversarial-claims": {
+      "effort": "xhigh",
+      "input_fingerprint_sha256": "c4d802ec7d8f3d7f54b4d78d1622552c588e2e4a43bec06fa26c794b6b6ec697",
+      "model": "gpt-5",
+      "verdict": "clean",
+      "verified_on": "2026-08-25",
+      "version": 1
+    },
+    "argument-integrity": {
+      "effort": "xhigh",
+      "evidence": {
+        "dismissals": [
+          "Dropped the claim that every scanner should run at every gate because the controls have different enforcement points, source coverage, cost, and operational trade-offs.",
+          "Dropped aggregate detection counts as a universal effectiveness ranking because the corpus is synthetic and scenario-shaped rather than representative production prevalence."
+        ],
+        "gap": "none",
+        "thesis_stated": "Secret scanning reduces credential-leak risk when a portable central Gitleaks gate is supplemented by host push protection and additional discovery only where business requirements justify them.",
+        "thesis_supported": "The cited product documentation and the repository's 18-scenario reproducible comparison support a conditional, layered selection rather than a universal accuracy ranking or a requirement to run every tool at every gate."
+      },
+      "input_fingerprint_sha256": "c4d802ec7d8f3d7f54b4d78d1622552c588e2e4a43bec06fa26c794b6b6ec697",
+      "model": "gpt-5",
+      "verdict": "clean",
+      "verified_on": "2026-08-25",
+      "version": 2
+    },
+    "cross-format": {
+      "effort": "xhigh",
+      "input_fingerprint_sha256": "1ddb1a9a3478cf1337fd5505e01b866d13009a3b1218fe4982271283519df4bd",
+      "model": "gpt-5",
+      "verdict": "clean",
+      "verified_on": "2026-08-25",
+      "version": 1
+    },
+    "cross-page": {
+      "effort": "xhigh",
+      "input_fingerprint_sha256": "01b5547bb22d2b484a8d152f654f15462efdd7fd85701ca3c62006dc7d43dfcb",
+      "model": "gpt-5",
+      "verdict": "clean",
+      "verified_on": "2026-08-25",
+      "version": 1
+    },
+    "decision-reconciliation": {
+      "effort": "xhigh",
+      "input_fingerprint_sha256": "2fe61db9758a49e5b6677854787d4958252bdf53802559dc312b2b8e868b1648",
+      "model": "gpt-5",
+      "verdict": "clean",
+      "verified_on": "2026-08-25",
+      "version": 1
+    },
+    "evidence-authority": {
+      "effort": "xhigh",
+      "input_fingerprint_sha256": "498ff1153ac25fcf0736bd6c95f9e0ab714c83c5a432fadf92284e26242c21d1",
+      "model": "gpt-5",
+      "verdict": "clean",
+      "verified_on": "2026-08-25",
+      "version": 1
+    },
+    "executable-demonstration": {
+      "effort": "xhigh",
+      "input_fingerprint_sha256": "bf1d7d7c5658de2b5acd83f1846da09bbfc24a918731b7ee3ebb793412dfe3aa",
+      "model": "gpt-5",
+      "verdict": "clean",
+      "verified_on": "2026-08-25",
+      "version": 2
+    },
+    "factual-correctness": {
+      "effort": "xhigh",
+      "input_fingerprint_sha256": "c0d63e47bf24d194c4029181a4c0da16ea69c00399c4e4c24771bb7c61459f4b",
+      "model": "gpt-5",
+      "verdict": "clean",
+      "verified_on": "2026-08-25",
+      "version": 1
+    },
+    "terminology-taxonomy": {
+      "effort": "xhigh",
+      "input_fingerprint_sha256": "c4d802ec7d8f3d7f54b4d78d1622552c588e2e4a43bec06fa26c794b6b6ec697",
+      "model": "gpt-5",
+      "verdict": "clean",
+      "verified_on": "2026-08-25",
+      "version": 1
+    },
+    "topic-completeness": {
+      "effort": "xhigh",
+      "input_fingerprint_sha256": "c4d802ec7d8f3d7f54b4d78d1622552c588e2e4a43bec06fa26c794b6b6ec697",
+      "model": "gpt-5",
+      "verdict": "clean",
+      "verified_on": "2026-08-25",
+      "version": 1
+    },
+    "visual-content": {
+      "effort": "xhigh",
+      "input_fingerprint_sha256": "7c966ea87037f2a00b968ba6add1987860eb37e60f37719f53103f14720c807e",
+      "model": "gpt-5",
+      "verdict": "clean",
+      "verified_on": "2026-08-25",
+      "version": 2
+    }
+  },
+  "schema_version": 1
+}

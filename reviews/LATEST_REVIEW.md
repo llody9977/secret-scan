@@ -2,17 +2,17 @@
 
 ## Status and baseline
 
-- Status: Ready for initial check-in; hosted GitHub checks and the product test remain follow-up
+- Status: Ready for follow-up check-in; initial hosted GitHub checks passed and the product test remains follow-up
 - Review date: 2026-08-25
 - Reviewer: Codex
 - Model / effort: `gpt-5` / `xhigh`
 - Branch: `main`
-- Commit: `INITIAL` (the repository has no initial commit)
-- Worktree: Dirty; all repository files are new and untracked
-- Review state ID: `dd1f7e102a584fb3f37a8f3d6555ed9830a2c9865d3b52ab5b6b9f6865cabe28`
-- Scoped content fingerprint: `1d3f037cce7b860be1fa54d779b1d7fc70d90bd98ff2244e4fcf3258d2fabef7`
+- Commit: `256446593051d22c01ea593919526e621333d1e6`
+- Worktree: Dirty; `README.md` adds the CodeQL badge after its first successful hosted run, `reviews/REVIEW_STATE.json` records the completed passes, and the review router recognizes the current GPT-5 reviewer family
+- Review state ID: `5412fbbe66650342d42f2372b513a8d853e77fb4a1fb32afb43894cc585a2bd4`
+- Scoped content fingerprint: `ab5c0807dc7fd2f0b6929e6d93b2d07f2d299dab1fbf10e051048c2b7396fc02`
 - State capture: `python3 scripts/capture_review_state.py` over the 13 scopes listed below
-- Pass state: Not recorded. `review_passes.py` requires a Git `HEAD`; no substitute state was fabricated.
+- Pass state: Recorded in `reviews/REVIEW_STATE.json` after the root commit supplied a Git `HEAD`.
 
 This review supersedes the earlier same-day record because feedback materially
 expanded the corpus, added GitHub's documented behavior and host-test procedure,
@@ -111,6 +111,11 @@ Safety properties checked:
 | Action runtime inspection | Checkout v7, CodeQL v4, and dependency-review v5 report Node 24 | Current upstream manifests on 2026-08-25 |
 | `pre-commit run --all-files` | Pass: staged Gitleaks, private-key, file-size, merge-conflict, EOF, and whitespace hooks | Local staged state |
 | Social-preview inspection | Pass: 1200×630 JPEG is legible and 108,034 bytes | Visual and size review of the committed asset |
+| Hosted CI | Pass: `Shell checks` and `Static site checks` | GitHub Actions run `32815702105` on the root commit |
+| Hosted secret scan | Pass: `Gitleaks full-history gate` | GitHub Actions run `32815702102` on the root commit |
+| Hosted CodeQL | Pass: `Analyze (python)` | GitHub Actions run `32815702047` on the root commit |
+| Hosted scanner comparison | Pass: `Comparison only — not a merge gate` | GitHub Actions run `32815701980` on the root commit |
+| Pages publication | Pass: deployment completed and the public URL returned HTTP 200 | GitHub Actions run `32815702018`; HTTP reachability is not a complete browser review |
 
 The first staged hook run exposed two check-in defects and remediated both: the
 Gitleaks hook now disables filename passing so its staged Git command receives
@@ -125,13 +130,11 @@ a 1.15 MB PNG. The unchanged 500 KB guard now catches future oversized assets.
   production accuracy or false-positive rates.
 - Large-history timing, collaboration/object sources, archives, images,
   provider-check latency, and production triage cost were not measured.
-- Browser rendering was not re-run for this revision; static site structure
-  passed and the already-running local preview can be refreshed for review.
-- At this frozen baseline the repository has no initial commit or remote, so
-  hosted workflows, Pages, required-status policy, and GitHub-native settings
-  have not yet been checked.
-- Because there is no `HEAD`, `reviews/REVIEW_STATE.json` remains intentionally
-  absent.
+- Browser rendering was not re-run for the badge-only revision; the badge does
+  not alter the Pages artifact, whose initial deployment completed and returned
+  HTTP 200.
+- Required-status policy is applied after the follow-up commit so its contexts
+  reference job names that have appeared in hosted runs.
 
 ## Closure
 

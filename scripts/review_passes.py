@@ -45,6 +45,7 @@ SCHEMA_VERSION = 1
 # false assurance, and it means the table going stale is safe.
 # --------------------------------------------------------------------------
 MODEL_RANK = {
+    "gpt-5": 3,
     "claude-haiku-4-5": 1,
     "claude-sonnet-5": 2,
     "claude-fable-5": 2,
