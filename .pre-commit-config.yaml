@@ -25,6 +25,7 @@ repos:
     rev: v6.0.0
     hooks:
       - id: detect-private-key
+        exclude: ^testdata/synthetic/
         stages: [pre-commit]
       - id: check-added-large-files
         stages: [pre-commit]

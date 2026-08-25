@@ -1,8 +1,15 @@
 # Synthetic secret-scan scenarios
 
-These fixtures are for local, defensive testing. They contain no live credential and make no network request.
+This directory contains two kinds of defensive fixtures. None was issued by a
+provider and none can authenticate to a service.
 
-- `leaked.env.tmpl` represents a hardcoded credential. The test script replaces its placeholder with a deterministic fictional value inside a temporary directory.
-- `safe.env` represents the same setting as a runtime reference rather than a stored value.
+- `leaked.env.tmpl` and `safe.env` drive the small local gate test. That script
+  still creates its fictional value under `mktemp`.
+- `synthetic/` is the checked-in evaluation corpus used by GitHub Actions and
+  GitHub Secret Protection. Its manifest records the expected result for every
+  scanner and is designed to grow when another credential format matters.
 
-The temporary value uses the repository-only `DEMO_…` format from `.gitleaks.toml`. It is never committed, cannot authenticate to a service, is fully redacted from scanner output, and is deleted when the test exits.
+The normal repository gates exclude only `testdata/synthetic/`, because those
+files intentionally resemble credentials. The separate remote evaluation
+workflow scans that directory explicitly, keeps raw TruffleHog output on the
+ephemeral runner, fully redacts Gitleaks reports, and publishes safe metadata.

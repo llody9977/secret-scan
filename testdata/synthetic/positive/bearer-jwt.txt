@@ -1,0 +1,2 @@
+# Locally constructed JWT-shaped value with no issuer or accepted signature.
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZW1vLXVzZXIiLCJleHAiOjQxMDI0NDQ4MDB9.js0mroM4YAVWNSHckPRx57mPgltlX7YWifu_vzQZiXY

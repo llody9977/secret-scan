@@ -11,3 +11,7 @@ description = "Fictional API key used only by the local secret-scan test"
 regex = '''\bDEMO_[A-Z0-9]{32}\b'''
 keywords = ["DEMO_"]
 tags = ["synthetic", "test"]
+
+[[allowlists]]
+description = "Checked-in fictional corpus; scanned separately by the remote evaluation workflow"
+paths = ['''(^|/)testdata/synthetic/''']

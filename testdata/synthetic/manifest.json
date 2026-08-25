@@ -1,0 +1,187 @@
+{
+  "schema_version": 1,
+  "description": "Non-issued credential shapes committed for defensive remote scanner evaluation.",
+  "provider_checks_enabled": false,
+  "scenarios": [
+    {
+      "id": "custom-internal",
+      "credential_class": "Custom internal token",
+      "target": "positive/custom-internal.env",
+      "expected_control_decision": "block",
+      "expected": {
+        "gitleaks": {"exit_code": 1, "findings": 1, "detector": "synthetic-demo-api-key"},
+        "trufflehog": {"exit_code": 183, "findings": 1, "detector": "CustomRegex"}
+      }
+    },
+    {
+      "id": "password-assignment",
+      "credential_class": "Username/password assignment",
+      "target": "positive/password-assignment.txt",
+      "expected_control_decision": "block",
+      "expected": {
+        "gitleaks": {"exit_code": 1, "findings": 1, "detector": "generic-api-key"},
+        "trufflehog": {"exit_code": 0, "findings": 0, "detector": null}
+      }
+    },
+    {
+      "id": "postgres-url",
+      "credential_class": "PostgreSQL credential URL",
+      "target": "positive/postgres-url.env",
+      "expected_control_decision": "block",
+      "expected": {
+        "gitleaks": {"exit_code": 0, "findings": 0, "detector": null},
+        "trufflehog": {"exit_code": 183, "findings": 1, "detector": "Postgres"}
+      }
+    },
+    {
+      "id": "basic-header",
+      "credential_class": "HTTP Basic credential",
+      "target": "positive/basic-header.txt",
+      "expected_control_decision": "block",
+      "expected": {
+        "gitleaks": {"exit_code": 0, "findings": 0, "detector": null},
+        "trufflehog": {"exit_code": 0, "findings": 0, "detector": null}
+      }
+    },
+    {
+      "id": "bearer-jwt",
+      "credential_class": "Bearer JWT",
+      "target": "positive/bearer-jwt.txt",
+      "expected_control_decision": "block",
+      "expected": {
+        "gitleaks": {"exit_code": 1, "findings": 1, "detector": "jwt"},
+        "trufflehog": {"exit_code": 0, "findings": 0, "detector": null}
+      }
+    },
+    {
+      "id": "github-pat",
+      "credential_class": "GitHub PAT-shaped token",
+      "target": "positive/github-pat.env",
+      "expected_control_decision": "block",
+      "expected": {
+        "gitleaks": {"exit_code": 0, "findings": 0, "detector": null},
+        "trufflehog": {"exit_code": 183, "findings": 1, "detector": "Github"}
+      }
+    },
+    {
+      "id": "oauth-client-secret",
+      "credential_class": "OAuth client secret",
+      "target": "positive/oauth-client.env",
+      "expected_control_decision": "block",
+      "expected": {
+        "gitleaks": {"exit_code": 1, "findings": 1, "detector": "generic-api-key"},
+        "trufflehog": {"exit_code": 0, "findings": 0, "detector": null}
+      }
+    },
+    {
+      "id": "aws-pair",
+      "credential_class": "AWS key pair, same file",
+      "target": "positive/aws-pair.env",
+      "expected_control_decision": "block",
+      "expected": {
+        "gitleaks": {"exit_code": 1, "findings": 1, "detector": "generic-api-key"},
+        "trufflehog": {"exit_code": 183, "findings": 1, "detector": "AWS"}
+      }
+    },
+    {
+      "id": "aws-split",
+      "credential_class": "AWS key pair, split files",
+      "target": "positive/aws-split",
+      "expected_control_decision": "block",
+      "expected": {
+        "gitleaks": {"exit_code": 1, "findings": 1, "detector": "generic-api-key"},
+        "trufflehog": {"exit_code": 0, "findings": 0, "detector": null}
+      }
+    },
+    {
+      "id": "service-account",
+      "credential_class": "Service-account private key",
+      "target": "positive/service-account.yaml",
+      "expected_control_decision": "block",
+      "expected": {
+        "gitleaks": {"exit_code": 1, "findings": 1, "detector": "private-key"},
+        "trufflehog": {"exit_code": 183, "findings": 1, "detector": "PrivateKey"}
+      }
+    },
+    {
+      "id": "rsa-private-key",
+      "credential_class": "RSA private key",
+      "target": "positive/rsa-private-key.pem",
+      "expected_control_decision": "block",
+      "expected": {
+        "gitleaks": {"exit_code": 1, "findings": 1, "detector": "private-key"},
+        "trufflehog": {"exit_code": 183, "findings": 1, "detector": "PrivateKey"}
+      }
+    },
+    {
+      "id": "openssh-private-key",
+      "credential_class": "OpenSSH private key",
+      "target": "positive/openssh-private-key",
+      "expected_control_decision": "block",
+      "expected": {
+        "gitleaks": {"exit_code": 1, "findings": 1, "detector": "private-key"},
+        "trufflehog": {"exit_code": 183, "findings": 1, "detector": "PrivateKey"}
+      }
+    },
+    {
+      "id": "symmetric-key",
+      "credential_class": "Symmetric encryption key",
+      "target": "positive/symmetric-key.env",
+      "expected_control_decision": "block",
+      "expected": {
+        "gitleaks": {"exit_code": 1, "findings": 1, "detector": "generic-api-key"},
+        "trufflehog": {"exit_code": 0, "findings": 0, "detector": null}
+      }
+    },
+    {
+      "id": "webhook-secret",
+      "credential_class": "Webhook signing secret",
+      "target": "positive/webhook-secret.env",
+      "expected_control_decision": "block",
+      "expected": {
+        "gitleaks": {"exit_code": 1, "findings": 1, "detector": "generic-api-key"},
+        "trufflehog": {"exit_code": 0, "findings": 0, "detector": null}
+      }
+    },
+    {
+      "id": "base64-custom",
+      "credential_class": "Base64-encoded custom token",
+      "target": "positive/base64-custom.env",
+      "expected_control_decision": "block",
+      "expected": {
+        "gitleaks": {"exit_code": 1, "findings": 2, "detector": "generic-api-key,synthetic-demo-api-key"},
+        "trufflehog": {"exit_code": 183, "findings": 1, "detector": "CustomRegex"}
+      }
+    },
+    {
+      "id": "runtime-reference",
+      "credential_class": "Runtime secret reference",
+      "target": "negative/runtime-reference.env",
+      "expected_control_decision": "pass",
+      "expected": {
+        "gitleaks": {"exit_code": 0, "findings": 0, "detector": null},
+        "trufflehog": {"exit_code": 0, "findings": 0, "detector": null}
+      }
+    },
+    {
+      "id": "placeholder",
+      "credential_class": "Placeholder value",
+      "target": "negative/placeholder.env",
+      "expected_control_decision": "pass",
+      "expected": {
+        "gitleaks": {"exit_code": 0, "findings": 0, "detector": null},
+        "trufflehog": {"exit_code": 0, "findings": 0, "detector": null}
+      }
+    },
+    {
+      "id": "public-key",
+      "credential_class": "SSH public key",
+      "target": "negative/openssh-public-key.pub",
+      "expected_control_decision": "pass",
+      "expected": {
+        "gitleaks": {"exit_code": 0, "findings": 0, "detector": null},
+        "trufflehog": {"exit_code": 0, "findings": 0, "detector": null}
+      }
+    }
+  ]
+}
