@@ -148,8 +148,8 @@ while IFS= read -r scenario; do
     exit 1
   fi
 
-  # Gitleaks output is persisted as safe metadata only. Its match-bearing fields
-  # must be empty or contain the scanner's full-redaction marker.
+  # Gitleaks output is persisted as safe metadata only. The Secret field must be
+  # exactly redacted; a non-empty contextual Match field must contain the marker.
   if ! jq -e 'all(.[];
     ((.Secret // "") == "" or (.Secret // "") == "REDACTED") and
     ((.Match // "") == "" or ((.Match // "") | contains("REDACTED"))))' \

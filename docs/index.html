@@ -289,7 +289,7 @@
       </table>
     </div>
 
-    <p><strong>Remote result:</strong> in <a href="https://github.com/llody9977/secret-scan/actions/runs/32823251440">Actions run 32823251440</a>, Gitleaks reported 13 of 16 positives and TruffleHog reported eight of 16; both passed three negatives. The <a href="https://github.com/llody9977/secret-scan/actions/runs/32823251440/artifacts/9553923464">machine-readable artifact</a> identifies the runner, commit, manifest digest, detector names, and exit codes. These are regression outcomes, not production accuracy rates.</p>
+    <p><strong>Remote result:</strong> in <a href="https://github.com/llody9977/secret-scan/actions/runs/32831205587">Actions run 32831205587</a>, Gitleaks reported 13 of 16 positives and TruffleHog reported eight of 16; both passed three negatives. The <a href="https://github.com/llody9977/secret-scan/actions/runs/32831205587/artifacts/9556823734">machine-readable artifact</a> identifies the runner, commit, manifest digest, detector names, and exit codes. These are regression outcomes, not production accuracy rates.</p>
 
     <aside class="callout note">
       <span class="callout-title">GitHub is an observed host result, not a simulated regex</span>
@@ -330,7 +330,7 @@
       <li>Inputs are non-issued shapes, provider checks are disabled, and no result says whether a credential is active.</li>
       <li>GitHub blocked one provider-shaped fixture and recorded its test bypass; one finding cannot estimate coverage for other providers or versions.</li>
       <li>The earlier 15 positives produced no host alert. Disabled non-provider patterns, unavailable custom patterns, non-issued shapes, and plan boundaries limit that conclusion.</li>
-      <li>TruffleHog JSON can contain raw matches, so the harness keeps it temporary and persists only safe metadata; Gitleaks reports are fully redacted.</li>
+      <li>TruffleHog JSON can contain raw matches, so the harness keeps it temporary and persists only safe metadata. Gitleaks <code>Secret</code> fields must be exactly redacted, and contextual <code>Match</code> fields are not published in production summaries.</li>
       <li>No large-history, archive, image, non-Git source, collaboration-surface, provider-latency, or operating-cost benchmark was performed.</li>
     </ul>
   </section>
@@ -400,12 +400,17 @@
       <article>
         <span class="result blocked">Required main status</span>
         <h3>Production Gitleaks gate</h3>
-        <p><a href="https://github.com/llody9977/secret-scan/actions/runs/32823251410">Run 32823251410</a> passed. The production scan excludes only the intentional corpus path. Main branch protection requires this status, although admin enforcement is disabled.</p>
+        <p><a href="https://github.com/llody9977/secret-scan/actions/runs/32831205515/job/97750057067">Job 97750057067</a> reports no findings, the pinned version and history scope, the excluded corpus, its control role, and safe report handling.</p>
       </article>
       <article>
         <span class="result passed">Remote evaluation</span>
         <h3>Gitleaks + TruffleHog corpus run</h3>
-        <p><a href="https://github.com/llody9977/secret-scan/actions/runs/32823251440">Run 32823251440</a> passed all 19 manifest assertions. Its job remains explicitly non-blocking; TruffleHog raw JSON stayed in ephemeral runner storage.</p>
+        <p><a href="https://github.com/llody9977/secret-scan/actions/runs/32831205587">Run 32831205587</a> passed all 19 manifest assertions. Its job remains explicitly non-blocking; TruffleHog raw JSON stayed in ephemeral runner storage.</p>
+      </article>
+      <article>
+        <span class="result passed">Scheduled discovery</span>
+        <h3>Production TruffleHog discovery</h3>
+        <p><a href="https://github.com/llody9977/secret-scan/actions/runs/32831215517/job/97750093790">Job 97750093790</a> reports no findings, provider checks disabled, the full-history detective scope, and temporary raw-output handling.</p>
       </article>
       <article>
         <span class="result blocked">Host push blocked</span>
@@ -415,8 +420,10 @@
     </div>
 
     <div class="artifact-links" aria-label="Test result files">
-      <a href="https://github.com/llody9977/secret-scan/actions/runs/32823251440"><span>Remote workflow run</span><small>Job summary, steps, versions, and logs</small></a>
-      <a href="https://github.com/llody9977/secret-scan/actions/runs/32823251440/artifacts/9553923464"><span>Remote JSON artifact</span><small>Machine-readable result retained for 90 days</small></a>
+      <a href="https://github.com/llody9977/secret-scan/actions/runs/32831205515/job/97750057067"><span>Gitleaks scan summary</span><small>Outcome, version, scope, role, and report handling</small></a>
+      <a href="https://github.com/llody9977/secret-scan/actions/runs/32831215517/job/97750093790"><span>TruffleHog scan summary</span><small>Outcome, version, scope, provider checks, and report handling</small></a>
+      <a href="https://github.com/llody9977/secret-scan/actions/runs/32831205587"><span>Remote corpus run</span><small>Full scenario summary, steps, versions, and logs</small></a>
+      <a href="https://github.com/llody9977/secret-scan/actions/runs/32831205587/artifacts/9556823734"><span>Remote JSON artifact</span><small>Machine-readable result retained for 90 days</small></a>
       <a href="https://github.com/llody9977/secret-scan/security/secret-scanning/1"><span>GitHub alert #1</span><small>Mailchimp pattern, commit location, and test-bypass resolution</small></a>
       <a href="https://github.com/llody9977/secret-scan/blob/main/results/scanner-comparison-results.json"><span>Durable CLI snapshot</span><small>Remote provenance and both engines</small></a>
       <a href="https://github.com/llody9977/secret-scan/blob/main/results/github-secret-protection-results.json"><span>GitHub host result</span><small>Push, settings, alerts, and feature availability</small></a>
